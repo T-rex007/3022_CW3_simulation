@@ -76,7 +76,7 @@ definitions
     rmu = 1/ mu
     nudge = 0.0001
     wire_length = 0.02
-    pen_len = 2/100
+    pen_len = 1.5/100
     
     a1 = 0.0179		                                                                                        ! Inner radius
     a2 = 0.0214                                                                                                  ! outer Radius
@@ -84,18 +84,25 @@ definitions
     ar = 0.05                                                                                                        ! radius of the arm
     fth = 0.0085                                                                                                   ! Thickness of the Fat 
     mth=0.0275                                                                                                   ! Thickness of muscle 
+    dcb =0.6/100
+    dcanb = ar - sth - mth - fth - dcb 
     ! Radius  of the wire
     muu_skin = pi *4e-7 
     muu_muscle=pi *4e-7 
     muu_fat = pi *4e-7 
     muu_wire = pi *4e-7 
-    
-     pvc_s_d = (8.44/1000)/2
-     wire_rad = pvc_s_d
-     cop_s_d = (6.3/1000)/2
-     sil_s_d = (5/1000)/2
-     di_s_d = (4.7/1000)/2
-     cop_c_d = (0.74/1000)/2
+    muu_pvc = pi *4e-7 
+    muu_cop_sh = pi *4e-7 
+    muu_di = pi *4e-7 
+    muu_cb =  pi *4e-7 
+    muu_canb =  pi *4e-7 
+    scale = 1
+     pvc_s_d = (8.44/1000)/2 * scale
+     wire_rad = pvc_s_d * scale
+     cop_s_d = (6.3/1000)/2* scale
+     sil_s_d = (5/1000)/2 * scale
+     di_s_d = (4.7/1000)/2 * scale
+     cop_c_d = (0.74/1000)/2 * scale
   
     current = 2.14
     current_density = current/(pi*wire_rad^2)
@@ -132,13 +139,13 @@ boundaries
            line to (-wire_length , 0)
            line to (-wire_length ,  wire_rad)
            line to close 
-    {
+    
     region 3
         J =0 
     	mu = muu_skin
         start 'Skin'((a2-a1)/2,ar +nudge)
         line to ((a2-a1)/2,  wire_rad ) to ((a2-a1)/2+sth,  wire_rad ) to ((a2-a1)/2+sth,ar+ nudge) to close
-        }
+        
    region 4
         J  = 0
     	mu = muu_fat
@@ -160,40 +167,53 @@ boundaries
         line to close
         
     region 6
-        mu = muu_wire
-        J = current_density
+        mu = muu_pvc
+        J = 0 !current_density
        START 'ring' ( wire_rad +pen_len , wire_rad )
            line to ( wire_rad + pen_len, cop_s_d )
            line to (-wire_length , cop_s_d)
            line to (-wire_length ,  wire_rad)
            line to close 
-   { 
+   
     region 7
-               mu = muu_wire
+               mu = muu_cop_sh
         J = current_density
-       START 'ring' ( wire_rad +pen_len , wire_rad )
-           line to ( wire_rad + pen_len, 0)
-           line to (-wire_length , 0)
-           line to (-wire_length ,  wire_rad)
+       START 'ring' ( wire_rad +pen_len , cop_s_d )
+           line to ( wire_rad + pen_len, di_s_d)
+           line to (-wire_length , di_s_d)
+           line to (-wire_length ,  cop_s_d)
            line to close 
+           
     region 8
-            mu = muu_wire
+            mu = muu_di
         J = current_density
-       START 'ring' ( wire_rad +pen_len , wire_rad )
-           line to ( wire_rad + pen_len, 0)
-           line to (-wire_length , 0)
-           line to (-wire_length ,  wire_rad)
+       START 'ring' ( wire_rad +pen_len , di_s_d )
+           line to ( wire_rad + pen_len, cop_c_d)
+           line to (-wire_length , cop_c_d)
+           line to (-wire_length ,  di_s_d)
            line to close 
     
     region 9
             mu = muu_wire
         J = current_density
-       START 'ring' ( wire_rad +pen_len , wire_rad )
+       START 'ring' ( wire_rad +pen_len , cop_c_d )
            line to ( wire_rad + pen_len, 0)
            line to (-wire_length , 0)
-           line to (-wire_length ,  wire_rad)
+           line to (-wire_length ,  cop_c_d)
            line to close 
+           
+    region 10
+        J  = 0
+    	mu = muu_cb
+        start 'Fat'( (a2-a1)/2  +sth + fth +mth ,ar + nudge)
+        line to ((a2-a1)/2 + sth + fth +mth , nudge) to ((a2-a1)/2+ sth +fth +mth+ dcb, nudge) to ((a2-a1)/2 + sth +fth+mth +dcb,ar+ nudge) to close
     
+    region 11
+        J  = 0
+    	mu = muu_canb
+        start 'Fat'( (a2-a1)/2  +sth + fth +mth + dcb ,ar + nudge)
+        line to ((a2-a1)/2 + sth + fth +mth +dcb , nudge) to ((a2-a1)/2+ sth +fth +mth+ dcb+ dcanb, nudge) to ((a2-a1)/2 + sth +fth+mth +dcb + dcanb,ar+ nudge) to close
+    {
     region 10
             mu = muu_wire
         J = current_density

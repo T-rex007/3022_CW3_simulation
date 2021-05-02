@@ -1,0 +1,2033 @@
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde 12:43:49 5/2/21
+================================================================
+    1| { MAGNET_COIL.PDE  
+    2|   
+    3| 
+    4|  
+    5|   According to Maxwell's equations, 
+    6|         curl H = J 
+    7|         div B = 0 
+    8|         B = mu*H or H = B/mu
+    9|  
+   10|   where B is the manetic flux density
+   11|         H is the magnetic field strength
+   12|         J is the electric current density
+   13|   and  mu is the magnetic permeability of the material.
+   14|  
+   15|   The magnetic vector potential A is related to B by 
+   16|         B = curl A 
+   17|   therefore 
+   18|         curl( (1/mu)*curl A ) = J
+   19|     if rmu = 1/mu
+   20|     then 
+   21|           curl( (rmu)*curl A ) = J    
+   22|  
+   23|   This equation is usually supplmented with the Coulomb Gauge condition 
+   24|         div A = 0.
+   25|  
+   26|   In the axisymmetric case, the current is assumed to flow only in the
+   27|   azimuthal direction, and only the azimuthal component of the vector
+   28|   potential is present.  Henceforth, we will simply refer to this component as A.
+   29|  
+   30|   The Coulomb Gauge is identically satisfied, and the PDE to be solved in this
+   31|   model takes the form 
+   32|         curl((1/mu)*curl (A)) = J(x,y)     in the domain
+   33|                            A  = g(x,y)     on the boundary.
+   34|  
+   35|   The magnetic induction B takes the simple form 
+   36|         B = (-dz(A), 0, dr(A)+A/r)
+   37|  
+   38|   and the magnetic field is given by 
+   39|         H = (-dz(A)/mu, 0, (dr(A)+A/r)/mu)
+   40|  
+   41|   Expanding the equation in cylindrical geometry results in the final equation, 
+   42|         dz(dz(A)/mu) + dr((dr(A)+A/r)/mu) = -J
+   43|  
+   44|   The interpretation of the natural boundary condition becomes 
+   45|         Natural(A) = n X H
+   46|  
+   47|   where n is the outward surface-normal unit vector.
+   48|  
+   49|   Across boundaries between regions of different material properties, the
+   50|   continuity of (n X H) assumed by the Galerkin solver implies that the
+   51|   tangential component of H is continuous, as required by the physics.
+   52|  
+   53|  
+   54|   In this simple test problem, we consider a circular coil whose axis of
+   55|   rotation lies along the X-axis. We bound the coil by a distant spherical
+   56|   surface at which we specify a boundary condition (n X H) = 0.
+   57|   At the axis, we use a Dirichlet boundary condition A=0.
+   58|  
+   59| }
+   60|  
+   61| title 'AXI-SYMMETRIC MAGNETIC FIELD'
+   62|  
+   63| coordinates
+   64|     { Cylindrical coordinates, with cylinder axis along Cartesian X direction }
+   65|     xcylinder(Z,R)  
+   66|  
+   67| variables
+   68|     Aphi        { the azimuthal component of the  vector potential }
+   69|  
+   70| definitions
+   71|    Lx =0.1
+   72|    Ly = 0.1
+   73|     mu0 = pi *4e-7            { the permeability }
+   74|     mu 
+   75|     J = 0              { the source defaults to zero }
+   76|     rmu = 1/ mu
+   77|     nudge = 0.0001
+   78|     wire_length = 0.02
+   79|     pen_len = 1.5/100
+   80|     
+   81|     sth =0.0015                                                                                                   ! Thickness of the skin
+   82|     ar = 0.05                                                                                                        ! radius of the arm
+   83|     fth = 0.0085                                                                                                   ! Thickness of the Fat 
+   84|     mth=0.0275                                                                                                   ! Thickness of muscle 
+   85|     dcb =0.6/100
+   86|     dcanb = ar - sth - mth - fth - dcb 
+   87|     ! Radius  of the wire
+   88|     muu_skin = pi *4e-7 
+   89|     muu_muscle=pi *4e-7 
+   90|     muu_fat = pi *4e-7 
+   91|     muu_cb =  pi *4e-7 
+   92|     muu_canb =  pi *4e-7 
+   93|     muu_in = pi *4e-7 
+   94|     muu_out = pi *4e-7 
+   95|     muu_di = pi *4e-7 
+   96|     scale = 1
+   97|     
+   98|      wire_rad = (8.44e-3)/2 * scale
+   99|      cop_out = (6.3e-3 - 4.7e-3)* scale                                                               !thickness of outside component
+  100|      di_s_d = (4.7e-3 - 0.7e-3) * scale                                                                 !thickness of dielectric
+  101|      cop_in = (1.8e-3) * scale
+  102|      hole = wire_rad - cop_s_d - di_s_d -cop_c_d
+Parse_Error at Line 102 Cols 24-30
+ in file C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde
+Undefined Name: COP_S_D
+
+-----Called from ReadExpression::default_names
+-----Called from ReadExpression::identifier
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+Parse_Error Catches RTException stop_parse(100,0000000002ED6520,0000000002EB2B30)
+errmsg: Undefined Name: COP_S_D
+
+Trace:
+-----Called from ReadExpression::default_names
+-----Called from ReadExpression::identifier
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+PDEThread Catches RTException stop_parse(100,0000000002ED6520,0000000002EB2B30)
+errmsg: Undefined Name: COP_S_D
+
+Trace:
+-----Called from ReadExpression::default_names
+-----Called from ReadExpression::identifier
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde 12:44:18 5/2/21
+================================================================
+    1| { MAGNET_COIL.PDE  
+    2|   
+    3| 
+    4|  
+    5|   According to Maxwell's equations, 
+    6|         curl H = J 
+    7|         div B = 0 
+    8|         B = mu*H or H = B/mu
+    9|  
+   10|   where B is the manetic flux density
+   11|         H is the magnetic field strength
+   12|         J is the electric current density
+   13|   and  mu is the magnetic permeability of the material.
+   14|  
+   15|   The magnetic vector potential A is related to B by 
+   16|         B = curl A 
+   17|   therefore 
+   18|         curl( (1/mu)*curl A ) = J
+   19|     if rmu = 1/mu
+   20|     then 
+   21|           curl( (rmu)*curl A ) = J    
+   22|  
+   23|   This equation is usually supplmented with the Coulomb Gauge condition 
+   24|         div A = 0.
+   25|  
+   26|   In the axisymmetric case, the current is assumed to flow only in the
+   27|   azimuthal direction, and only the azimuthal component of the vector
+   28|   potential is present.  Henceforth, we will simply refer to this component as A.
+   29|  
+   30|   The Coulomb Gauge is identically satisfied, and the PDE to be solved in this
+   31|   model takes the form 
+   32|         curl((1/mu)*curl (A)) = J(x,y)     in the domain
+   33|                            A  = g(x,y)     on the boundary.
+   34|  
+   35|   The magnetic induction B takes the simple form 
+   36|         B = (-dz(A), 0, dr(A)+A/r)
+   37|  
+   38|   and the magnetic field is given by 
+   39|         H = (-dz(A)/mu, 0, (dr(A)+A/r)/mu)
+   40|  
+   41|   Expanding the equation in cylindrical geometry results in the final equation, 
+   42|         dz(dz(A)/mu) + dr((dr(A)+A/r)/mu) = -J
+   43|  
+   44|   The interpretation of the natural boundary condition becomes 
+   45|         Natural(A) = n X H
+   46|  
+   47|   where n is the outward surface-normal unit vector.
+   48|  
+   49|   Across boundaries between regions of different material properties, the
+   50|   continuity of (n X H) assumed by the Galerkin solver implies that the
+   51|   tangential component of H is continuous, as required by the physics.
+   52|  
+   53|  
+   54|   In this simple test problem, we consider a circular coil whose axis of
+   55|   rotation lies along the X-axis. We bound the coil by a distant spherical
+   56|   surface at which we specify a boundary condition (n X H) = 0.
+   57|   At the axis, we use a Dirichlet boundary condition A=0.
+   58|  
+   59| }
+   60|  
+   61| title 'AXI-SYMMETRIC MAGNETIC FIELD'
+   62|  
+   63| coordinates
+   64|     { Cylindrical coordinates, with cylinder axis along Cartesian X direction }
+   65|     xcylinder(Z,R)  
+   66|  
+   67| variables
+   68|     Aphi        { the azimuthal component of the  vector potential }
+   69|  
+   70| definitions
+   71|    Lx =0.1
+   72|    Ly = 0.1
+   73|     mu0 = pi *4e-7            { the permeability }
+   74|     mu 
+   75|     J = 0              { the source defaults to zero }
+   76|     rmu = 1/ mu
+   77|     nudge = 0.0001
+   78|     wire_length = 0.02
+   79|     pen_len = 1.5/100
+   80|     
+   81|     sth =0.0015                                                                                                   ! Thickness of the skin
+   82|     ar = 0.05                                                                                                        ! radius of the arm
+   83|     fth = 0.0085                                                                                                   ! Thickness of the Fat 
+   84|     mth=0.0275                                                                                                   ! Thickness of muscle 
+   85|     dcb =0.6/100
+   86|     dcanb = ar - sth - mth - fth - dcb 
+   87|     ! Radius  of the wire
+   88|     muu_skin = pi *4e-7 
+   89|     muu_muscle=pi *4e-7 
+   90|     muu_fat = pi *4e-7 
+   91|     muu_cb =  pi *4e-7 
+   92|     muu_canb =  pi *4e-7 
+   93|     muu_in = pi *4e-7 
+   94|     muu_out = pi *4e-7 
+   95|     muu_di = pi *4e-7 
+   96|     scale = 1
+   97|     
+   98|      wire_rad = (8.44e-3)/2 * scale
+   99|      cop_out = (6.3e-3 - 4.7e-3)* scale                                                               !thickness of outside component
+  100|      di_s_d = (4.7e-3 - 0.7e-3) * scale                                                                 !thickness of dielectric
+  101|      cop_in = (1.8e-3) * scale
+  102|      hole = wire_rad - cop_in - di_s_d -cop_out
+  103|   
+  104|     current = 2.14
+  105|     current_density = current/(pi*wire_rad^2)
+  106|     Bz = dr(r*Aphi)/r                                                                                       ! The Z-component of the Flux density
+  107|     Br = dz(Aphi)                                                                                            ! The R-component of the Flux density Note: the phi-component
+  108|     Bmag = sqrt(Bz^2 + Br^2)                                                                         ! The Magnitude of the flux density
+  109|     H = curl(Aphi)/mu                                                                                      ! The magnetic field strength
+  110|     Hmag = magnitude(H)                                                                               ! The magnitude magnetic field strength
+  111|     B = curl(Aphi)                                                                                            ! The magnetic flux density
+  112|     !Bmag = magnitude(B)
+  113|     !J1 = curl(H)
+  114| initial values
+  115|     Aphi = 2            { unimportant unless mu varies with H }
+  116|  
+  117| equations
+  118|     { FlexPDE expands CURL in proper coordinates }
+  119|     Aphi : curl(rmu*curl(Aphi)) = J 
+  120|  
+  121| boundaries
+  122|     region 1 'Domain'
+  123|      mu = mu0
+  124|        START 'ring' ( -Lx , 0)
+  125|            line to (Lx,0)
+  126|            line to (Lx, Ly)
+  127|            line to (-Lx Ly)
+ERROR in state 597: GOT: 2(<identifier>) WANTED: 13(<)>)
+Parse_Error at Line 127 Cols 25-26
+ in file C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde
+FlexPDE grammar does not allow '<identifier>' in this location.
+Some of the 7 allowable symbols are:
+<)>
+<comma>
+<semicolon>
+<plus>
+<minus>
+
+-----Called from ReadPDE::rpterror
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+Parse_Error Catches RTException stop_parse(100,0000000002EB6080,0000000002E20A70)
+errmsg: FlexPDE grammar does not allow '<identifier>' in this location.
+Some of the 7 allowable symbols are:
+<)>
+<comma>
+<semicolon>
+<plus>
+<minus>
+
+Trace:
+-----Called from ReadPDE::rpterror
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+PDEThread Catches RTException stop_parse(100,0000000002EB6080,0000000002E20A70)
+errmsg: FlexPDE grammar does not allow '<identifier>' in this location.
+Some of the 7 allowable symbols are:
+<)>
+<comma>
+<semicolon>
+<plus>
+<minus>
+
+Trace:
+-----Called from ReadPDE::rpterror
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde 12:44:39 5/2/21
+================================================================
+    1| { MAGNET_COIL.PDE  
+    2|   
+    3| 
+    4|  
+    5|   According to Maxwell's equations, 
+    6|         curl H = J 
+    7|         div B = 0 
+    8|         B = mu*H or H = B/mu
+    9|  
+   10|   where B is the manetic flux density
+   11|         H is the magnetic field strength
+   12|         J is the electric current density
+   13|   and  mu is the magnetic permeability of the material.
+   14|  
+   15|   The magnetic vector potential A is related to B by 
+   16|         B = curl A 
+   17|   therefore 
+   18|         curl( (1/mu)*curl A ) = J
+   19|     if rmu = 1/mu
+   20|     then 
+   21|           curl( (rmu)*curl A ) = J    
+   22|  
+   23|   This equation is usually supplmented with the Coulomb Gauge condition 
+   24|         div A = 0.
+   25|  
+   26|   In the axisymmetric case, the current is assumed to flow only in the
+   27|   azimuthal direction, and only the azimuthal component of the vector
+   28|   potential is present.  Henceforth, we will simply refer to this component as A.
+   29|  
+   30|   The Coulomb Gauge is identically satisfied, and the PDE to be solved in this
+   31|   model takes the form 
+   32|         curl((1/mu)*curl (A)) = J(x,y)     in the domain
+   33|                            A  = g(x,y)     on the boundary.
+   34|  
+   35|   The magnetic induction B takes the simple form 
+   36|         B = (-dz(A), 0, dr(A)+A/r)
+   37|  
+   38|   and the magnetic field is given by 
+   39|         H = (-dz(A)/mu, 0, (dr(A)+A/r)/mu)
+   40|  
+   41|   Expanding the equation in cylindrical geometry results in the final equation, 
+   42|         dz(dz(A)/mu) + dr((dr(A)+A/r)/mu) = -J
+   43|  
+   44|   The interpretation of the natural boundary condition becomes 
+   45|         Natural(A) = n X H
+   46|  
+   47|   where n is the outward surface-normal unit vector.
+   48|  
+   49|   Across boundaries between regions of different material properties, the
+   50|   continuity of (n X H) assumed by the Galerkin solver implies that the
+   51|   tangential component of H is continuous, as required by the physics.
+   52|  
+   53|  
+   54|   In this simple test problem, we consider a circular coil whose axis of
+   55|   rotation lies along the X-axis. We bound the coil by a distant spherical
+   56|   surface at which we specify a boundary condition (n X H) = 0.
+   57|   At the axis, we use a Dirichlet boundary condition A=0.
+   58|  
+   59| }
+   60|  
+   61| title 'AXI-SYMMETRIC MAGNETIC FIELD'
+   62|  
+   63| coordinates
+   64|     { Cylindrical coordinates, with cylinder axis along Cartesian X direction }
+   65|     xcylinder(Z,R)  
+   66|  
+   67| variables
+   68|     Aphi        { the azimuthal component of the  vector potential }
+   69|  
+   70| definitions
+   71|    Lx =0.1
+   72|    Ly = 0.1
+   73|     mu0 = pi *4e-7            { the permeability }
+   74|     mu 
+   75|     J = 0              { the source defaults to zero }
+   76|     rmu = 1/ mu
+   77|     nudge = 0.0001
+   78|     wire_length = 0.02
+   79|     pen_len = 1.5/100
+   80|     
+   81|     sth =0.0015                                                                                                   ! Thickness of the skin
+   82|     ar = 0.05                                                                                                        ! radius of the arm
+   83|     fth = 0.0085                                                                                                   ! Thickness of the Fat 
+   84|     mth=0.0275                                                                                                   ! Thickness of muscle 
+   85|     dcb =0.6/100
+   86|     dcanb = ar - sth - mth - fth - dcb 
+   87|     ! Radius  of the wire
+   88|     muu_skin = pi *4e-7 
+   89|     muu_muscle=pi *4e-7 
+   90|     muu_fat = pi *4e-7 
+   91|     muu_cb =  pi *4e-7 
+   92|     muu_canb =  pi *4e-7 
+   93|     muu_in = pi *4e-7 
+   94|     muu_out = pi *4e-7 
+   95|     muu_di = pi *4e-7 
+   96|     scale = 1
+   97|     
+   98|      wire_rad = (8.44e-3)/2 * scale
+   99|      cop_out = (6.3e-3 - 4.7e-3)* scale                                                               !thickness of outside component
+  100|      di_s_d = (4.7e-3 - 0.7e-3) * scale                                                                 !thickness of dielectric
+  101|      cop_in = (1.8e-3) * scale
+  102|      hole = wire_rad - cop_in - di_s_d -cop_out
+  103|   
+  104|     current = 2.14
+  105|     current_density = current/(pi*wire_rad^2)
+  106|     Bz = dr(r*Aphi)/r                                                                                       ! The Z-component of the Flux density
+  107|     Br = dz(Aphi)                                                                                            ! The R-component of the Flux density Note: the phi-component
+  108|     Bmag = sqrt(Bz^2 + Br^2)                                                                         ! The Magnitude of the flux density
+  109|     H = curl(Aphi)/mu                                                                                      ! The magnetic field strength
+  110|     Hmag = magnitude(H)                                                                               ! The magnitude magnetic field strength
+  111|     B = curl(Aphi)                                                                                            ! The magnetic flux density
+  112|     !Bmag = magnitude(B)
+  113|     !J1 = curl(H)
+  114| initial values
+  115|     Aphi = 2            { unimportant unless mu varies with H }
+  116|  
+  117| equations
+  118|     { FlexPDE expands CURL in proper coordinates }
+  119|     Aphi : curl(rmu*curl(Aphi)) = J 
+  120|  
+  121| boundaries
+  122|     region 1 'Domain'
+  123|      mu = mu0
+  124|        START 'ring' ( -Lx , 0)
+  125|            line to (Lx,0)
+  126|            line to (Lx, Ly)
+  127|            line to (-Lx Ly)
+ERROR in state 597: GOT: 2(<identifier>) WANTED: 13(<)>)
+Parse_Error at Line 127 Cols 25-26
+ in file C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde
+FlexPDE grammar does not allow '<identifier>' in this location.
+Some of the 7 allowable symbols are:
+<)>
+<comma>
+<semicolon>
+<plus>
+<minus>
+
+-----Called from ReadPDE::rpterror
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+Parse_Error Catches RTException stop_parse(100,0000000002E756D0,0000000002E1DC70)
+errmsg: FlexPDE grammar does not allow '<identifier>' in this location.
+Some of the 7 allowable symbols are:
+<)>
+<comma>
+<semicolon>
+<plus>
+<minus>
+
+Trace:
+-----Called from ReadPDE::rpterror
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+PDEThread Catches RTException stop_parse(100,0000000002E756D0,0000000002E1DC70)
+errmsg: FlexPDE grammar does not allow '<identifier>' in this location.
+Some of the 7 allowable symbols are:
+<)>
+<comma>
+<semicolon>
+<plus>
+<minus>
+
+Trace:
+-----Called from ReadPDE::rpterror
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde 12:45:00 5/2/21
+================================================================
+    1| { MAGNET_COIL.PDE  
+    2|   
+    3| 
+    4|  
+    5|   According to Maxwell's equations, 
+    6|         curl H = J 
+    7|         div B = 0 
+    8|         B = mu*H or H = B/mu
+    9|  
+   10|   where B is the manetic flux density
+   11|         H is the magnetic field strength
+   12|         J is the electric current density
+   13|   and  mu is the magnetic permeability of the material.
+   14|  
+   15|   The magnetic vector potential A is related to B by 
+   16|         B = curl A 
+   17|   therefore 
+   18|         curl( (1/mu)*curl A ) = J
+   19|     if rmu = 1/mu
+   20|     then 
+   21|           curl( (rmu)*curl A ) = J    
+   22|  
+   23|   This equation is usually supplmented with the Coulomb Gauge condition 
+   24|         div A = 0.
+   25|  
+   26|   In the axisymmetric case, the current is assumed to flow only in the
+   27|   azimuthal direction, and only the azimuthal component of the vector
+   28|   potential is present.  Henceforth, we will simply refer to this component as A.
+   29|  
+   30|   The Coulomb Gauge is identically satisfied, and the PDE to be solved in this
+   31|   model takes the form 
+   32|         curl((1/mu)*curl (A)) = J(x,y)     in the domain
+   33|                            A  = g(x,y)     on the boundary.
+   34|  
+   35|   The magnetic induction B takes the simple form 
+   36|         B = (-dz(A), 0, dr(A)+A/r)
+   37|  
+   38|   and the magnetic field is given by 
+   39|         H = (-dz(A)/mu, 0, (dr(A)+A/r)/mu)
+   40|  
+   41|   Expanding the equation in cylindrical geometry results in the final equation, 
+   42|         dz(dz(A)/mu) + dr((dr(A)+A/r)/mu) = -J
+   43|  
+   44|   The interpretation of the natural boundary condition becomes 
+   45|         Natural(A) = n X H
+   46|  
+   47|   where n is the outward surface-normal unit vector.
+   48|  
+   49|   Across boundaries between regions of different material properties, the
+   50|   continuity of (n X H) assumed by the Galerkin solver implies that the
+   51|   tangential component of H is continuous, as required by the physics.
+   52|  
+   53|  
+   54|   In this simple test problem, we consider a circular coil whose axis of
+   55|   rotation lies along the X-axis. We bound the coil by a distant spherical
+   56|   surface at which we specify a boundary condition (n X H) = 0.
+   57|   At the axis, we use a Dirichlet boundary condition A=0.
+   58|  
+   59| }
+   60|  
+   61| title 'AXI-SYMMETRIC MAGNETIC FIELD'
+   62|  
+   63| coordinates
+   64|     { Cylindrical coordinates, with cylinder axis along Cartesian X direction }
+   65|     xcylinder(Z,R)  
+   66|  
+   67| variables
+   68|     Aphi        { the azimuthal component of the  vector potential }
+   69|  
+   70| definitions
+   71|    Lx =0.1
+   72|    Ly = 0.1
+   73|     mu0 = pi *4e-7            { the permeability }
+   74|     mu 
+   75|     J = 0              { the source defaults to zero }
+   76|     rmu = 1/ mu
+   77|     nudge = 0.0001
+   78|     wire_length = 0.02
+   79|     pen_len = 1.5/100
+   80|     
+   81|     sth =0.0015                                                                                                   ! Thickness of the skin
+   82|     ar = 0.05                                                                                                        ! radius of the arm
+   83|     fth = 0.0085                                                                                                   ! Thickness of the Fat 
+   84|     mth=0.0275                                                                                                   ! Thickness of muscle 
+   85|     dcb =0.6/100
+   86|     dcanb = ar - sth - mth - fth - dcb 
+   87|     ! Radius  of the wire
+   88|     muu_skin = pi *4e-7 
+   89|     muu_muscle=pi *4e-7 
+   90|     muu_fat = pi *4e-7 
+   91|     muu_cb =  pi *4e-7 
+   92|     muu_canb =  pi *4e-7 
+   93|     muu_in = pi *4e-7 
+   94|     muu_out = pi *4e-7 
+   95|     muu_di = pi *4e-7 
+   96|     scale = 1
+   97|     
+   98|      wire_rad = (8.44e-3)/2 * scale
+   99|      cop_out = (6.3e-3 - 4.7e-3)* scale                                                               !thickness of outside component
+  100|      di_s_d = (4.7e-3 - 0.7e-3) * scale                                                                 !thickness of dielectric
+  101|      cop_in = (1.8e-3) * scale
+  102|      hole = wire_rad - cop_in - di_s_d -cop_out
+  103|   
+  104|     current = 2.14
+  105|     current_density = current/(pi*wire_rad^2)
+  106|     Bz = dr(r*Aphi)/r                                                                                       ! The Z-component of the Flux density
+  107|     Br = dz(Aphi)                                                                                            ! The R-component of the Flux density Note: the phi-component
+  108|     Bmag = sqrt(Bz^2 + Br^2)                                                                         ! The Magnitude of the flux density
+  109|     H = curl(Aphi)/mu                                                                                      ! The magnetic field strength
+  110|     Hmag = magnitude(H)                                                                               ! The magnitude magnetic field strength
+  111|     B = curl(Aphi)                                                                                            ! The magnetic flux density
+  112|     !Bmag = magnitude(B)
+  113|     !J1 = curl(H)
+  114| initial values
+  115|     Aphi = 2            { unimportant unless mu varies with H }
+  116|  
+  117| equations
+  118|     { FlexPDE expands CURL in proper coordinates }
+  119|     Aphi : curl(rmu*curl(Aphi)) = J 
+  120|  
+  121| boundaries
+  122|     region 1 'Domain'
+  123|      mu = mu0
+  124|        START 'ring' ( -Lx , 0)
+  125|            line to (Lx,0)
+  126|            line to (Lx, Ly)
+  127|            line to (-Lx, Ly)
+  128|            line to close 
+  129|     
+  130|     region 2 'Skin'
+  131|     	mu = muu_skin
+  132|         start (0, ar)
+  133|         line to (sth,  ar) to (sth,  0) to (0, 0) to close
+  134|         
+  135|    region 3 'Fat'
+  136|     	mu = muu_fat
+  137|         start (sth, ar)
+  138|         line to (sth + fth,  ar) to (sth + fth,  0) to (sth, 0) to close
+  139|         
+  140|     region 4 'Muscle'
+  141|     	mu = muu_muscle 
+  142|         start (sth + fth, ar)
+  143|         line to (sth + fth + mth,  ar) to (sth + fth + mth,  0) to (sth + fth, 0) to close
+  144|         
+  145|     region 5 'Cortical Bone'
+  146|     	mu = muu_cb
+  147|         start (sth + fth + mth, ar)
+  148|         line to (sth + fth + mth + dcb,  ar) to (sth + fth + mth + dcb,  0) to (sth + fth + mth, 0) to close
+  149|         
+  150|     region 6 'Cancellous Bone'
+  151|     	mu = muu_canb
+  152|         start (sth + fth + mth +dcb, ar)
+  153|         line to (sth + fth + mth + dcb + dcanb,  ar) to (sth + fth + mth + dcb + dcanb,  0) to (sth + fth + mth + dcb, 0) to close
+  154|         
+  155|     region 7 'Hole'
+  156|         mu = mu0
+  157|        START 'ring' (pen_len , hole)
+Parse_Error at Line 157 Cols 21-36
+ in file C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde
+Negative Radius is Illegal in Cylindrical Geometry.
+-----Called from ReadDomain::check_joint
+-----Called from ReadDomain::startpoint
+-----Called from ReadDomain::namestart
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+Parse_Error Catches RTException stop_parse(100,0000000002ECD930,0000000002EE2580)
+errmsg: Negative Radius is Illegal in Cylindrical Geometry.
+Trace:
+-----Called from ReadDomain::check_joint
+-----Called from ReadDomain::startpoint
+-----Called from ReadDomain::namestart
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+PDEThread Catches RTException stop_parse(100,0000000002ECD930,0000000002EE2580)
+errmsg: Negative Radius is Illegal in Cylindrical Geometry.
+Trace:
+-----Called from ReadDomain::check_joint
+-----Called from ReadDomain::startpoint
+-----Called from ReadDomain::namestart
+-----Called from Parser::parse
+-----Called from control::parse_file
+-----Called from control::do_parse
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde 12:46:15 5/2/21
+================================================================
+    1| { MAGNET_COIL.PDE  
+    2|   
+    3| 
+    4|  
+    5|   According to Maxwell's equations, 
+    6|         curl H = J 
+    7|         div B = 0 
+    8|         B = mu*H or H = B/mu
+    9|  
+   10|   where B is the manetic flux density
+   11|         H is the magnetic field strength
+   12|         J is the electric current density
+   13|   and  mu is the magnetic permeability of the material.
+   14|  
+   15|   The magnetic vector potential A is related to B by 
+   16|         B = curl A 
+   17|   therefore 
+   18|         curl( (1/mu)*curl A ) = J
+   19|     if rmu = 1/mu
+   20|     then 
+   21|           curl( (rmu)*curl A ) = J    
+   22|  
+   23|   This equation is usually supplmented with the Coulomb Gauge condition 
+   24|         div A = 0.
+   25|  
+   26|   In the axisymmetric case, the current is assumed to flow only in the
+   27|   azimuthal direction, and only the azimuthal component of the vector
+   28|   potential is present.  Henceforth, we will simply refer to this component as A.
+   29|  
+   30|   The Coulomb Gauge is identically satisfied, and the PDE to be solved in this
+   31|   model takes the form 
+   32|         curl((1/mu)*curl (A)) = J(x,y)     in the domain
+   33|                            A  = g(x,y)     on the boundary.
+   34|  
+   35|   The magnetic induction B takes the simple form 
+   36|         B = (-dz(A), 0, dr(A)+A/r)
+   37|  
+   38|   and the magnetic field is given by 
+   39|         H = (-dz(A)/mu, 0, (dr(A)+A/r)/mu)
+   40|  
+   41|   Expanding the equation in cylindrical geometry results in the final equation, 
+   42|         dz(dz(A)/mu) + dr((dr(A)+A/r)/mu) = -J
+   43|  
+   44|   The interpretation of the natural boundary condition becomes 
+   45|         Natural(A) = n X H
+   46|  
+   47|   where n is the outward surface-normal unit vector.
+   48|  
+   49|   Across boundaries between regions of different material properties, the
+   50|   continuity of (n X H) assumed by the Galerkin solver implies that the
+   51|   tangential component of H is continuous, as required by the physics.
+   52|  
+   53|  
+   54|   In this simple test problem, we consider a circular coil whose axis of
+   55|   rotation lies along the X-axis. We bound the coil by a distant spherical
+   56|   surface at which we specify a boundary condition (n X H) = 0.
+   57|   At the axis, we use a Dirichlet boundary condition A=0.
+   58|  
+   59| }
+   60|  
+   61| title 'AXI-SYMMETRIC MAGNETIC FIELD'
+   62|  
+   63| coordinates
+   64|     { Cylindrical coordinates, with cylinder axis along Cartesian X direction }
+   65|     xcylinder(Z,R)  
+   66|  
+   67| variables
+   68|     Aphi        { the azimuthal component of the  vector potential }
+   69|  
+   70| definitions
+   71|    Lx =0.1
+   72|    Ly = 0.1
+   73|     mu0 = pi *4e-7            { the permeability }
+   74|     mu 
+   75|     J = 0              { the source defaults to zero }
+   76|     rmu = 1/ mu
+   77|     nudge = 0.0001
+   78|     wire_length = 0.02
+   79|     pen_len = 1.5/100
+   80|     
+   81|     sth =0.0015                                                                                                   ! Thickness of the skin
+   82|     ar = 0.05                                                                                                        ! radius of the arm
+   83|     fth = 0.0085                                                                                                   ! Thickness of the Fat 
+   84|     mth=0.0275                                                                                                   ! Thickness of muscle 
+   85|     dcb =0.6/100
+   86|     dcanb = ar - sth - mth - fth - dcb 
+   87|     ! Radius  of the wire
+   88|     muu_skin = pi *4e-7 
+   89|     muu_muscle=pi *4e-7 
+   90|     muu_fat = pi *4e-7 
+   91|     muu_cb =  pi *4e-7 
+   92|     muu_canb =  pi *4e-7 
+   93|     muu_in = pi *4e-7 
+   94|     muu_out = pi *4e-7 
+   95|     muu_di = pi *4e-7 
+   96|     scale = 1
+   97|     
+   98|      wire_rad = (8.44e-3) * scale
+   99|      cop_out = (6.3e-3 - 4.7e-3)* scale                                                               !thickness of outside component
+  100|      di_s_d = (4.7e-3 - 0.7e-3) * scale                                                                 !thickness of dielectric
+  101|      cop_in = (1.8e-3) * scale
+  102|      hole = wire_rad - cop_in - di_s_d -cop_out
+  103|   
+  104|     current = 2.14
+  105|     current_density = current/(pi*wire_rad^2)
+  106|     Bz = dr(r*Aphi)/r                                                                                       ! The Z-component of the Flux density
+  107|     Br = dz(Aphi)                                                                                            ! The R-component of the Flux density Note: the phi-component
+  108|     Bmag = sqrt(Bz^2 + Br^2)                                                                         ! The Magnitude of the flux density
+  109|     H = curl(Aphi)/mu                                                                                      ! The magnetic field strength
+  110|     Hmag = magnitude(H)                                                                               ! The magnitude magnetic field strength
+  111|     B = curl(Aphi)                                                                                            ! The magnetic flux density
+  112|     !Bmag = magnitude(B)
+  113|     !J1 = curl(H)
+  114| initial values
+  115|     Aphi = 2            { unimportant unless mu varies with H }
+  116|  
+  117| equations
+  118|     { FlexPDE expands CURL in proper coordinates }
+  119|     Aphi : curl(rmu*curl(Aphi)) = J 
+  120|  
+  121| boundaries
+  122|     region 1 'Domain'
+  123|      mu = mu0
+  124|        START 'ring' ( -Lx , 0)
+  125|            line to (Lx,0)
+  126|            line to (Lx, Ly)
+  127|            line to (-Lx, Ly)
+  128|            line to close 
+  129|     
+  130|     region 2 'Skin'
+  131|     	mu = muu_skin
+  132|         start (0, ar)
+  133|         line to (sth,  ar) to (sth,  0) to (0, 0) to close
+  134|         
+  135|    region 3 'Fat'
+  136|     	mu = muu_fat
+  137|         start (sth, ar)
+  138|         line to (sth + fth,  ar) to (sth + fth,  0) to (sth, 0) to close
+  139|         
+  140|     region 4 'Muscle'
+  141|     	mu = muu_muscle 
+  142|         start (sth + fth, ar)
+  143|         line to (sth + fth + mth,  ar) to (sth + fth + mth,  0) to (sth + fth, 0) to close
+  144|         
+  145|     region 5 'Cortical Bone'
+  146|     	mu = muu_cb
+  147|         start (sth + fth + mth, ar)
+  148|         line to (sth + fth + mth + dcb,  ar) to (sth + fth + mth + dcb,  0) to (sth + fth + mth, 0) to close
+  149|         
+  150|     region 6 'Cancellous Bone'
+  151|     	mu = muu_canb
+  152|         start (sth + fth + mth +dcb, ar)
+  153|         line to (sth + fth + mth + dcb + dcanb,  ar) to (sth + fth + mth + dcb + dcanb,  0) to (sth + fth + mth + dcb, 0) to close
+  154|         
+  155|     region 7 'Hole'
+  156|         mu = mu0
+  157|        START 'ring' (pen_len , hole)
+  158|            line to (pen_len, 0)
+  159|            line to (-wire_length , 0)
+  160|            line to (-wire_length ,  hole)
+  161|            line to close 
+  162|            
+  163|     region 8 'Terminal'
+  164|         mu = muu_in
+  165|         J = current_density
+  166|        START 'ring' (pen_len , hole + cop_in)
+  167|            line to (pen_len, hole)
+  168|            line to (-wire_length , hole)
+  169|            line to (-wire_length ,  hole + cop_in)
+  170|            line to close 
+  171|         
+  172|     region 9 'Dielectric'
+  173|         mu = muu_di
+  174|        START 'ring' (pen_len , wire_rad )
+  175|            line to (pen_len, cop_in)
+  176|            line to (-wire_length , cop_in)
+  177|            line to (-wire_length ,  wire_rad)
+  178|            line to close 
+  179|            
+  180|     region 10 'Ground'
+  181|         mu = muu_out
+  182|         J = -current_density
+  183|        START 'ring' (pen_len, wire_rad)
+  184|            line to (pen_len, wire_rad - cop_out)
+  185|            line to (0 , wire_rad - cop_out)
+  186|            line to (0 ,  wire_rad)
+  187|            line to close 
+  188|            
+  189| monitors
+  190|     contour(Bz) zoom(-2,0,4,4) as 'FLUX DENSITY B'
+  191|     contour(Aphi) as 'Potential'
+  192|  
+  193| plots
+  194|     grid(z,r)
+  195|     contour(Bz)  as 'FLUX DENSITY B'
+  196|     contour(Bz) zoom(-2,0,4,4)  as 'FLUX DENSITY B'
+  197|     contour(Bmag) as 'Magnitude of the Flux Density (T)' PNG
+  198|     contour(Hmag) as  'Magnitude of Field intensity (A/m)' PNG
+  199|     elevation(Aphi,dr(Aphi),Aphi/r,dr(Aphi)+Aphi/r,Aphi+r*dr(Aphi)) 
+  200|         from (0,0) to (0,1) as 'Bz'
+  201|     vector(dr(Aphi)+Aphi/r,-dz(Aphi)) as 'FLUX DENSITY B'
+  202|     vector(dr(Aphi)+Aphi/r,-dz(Aphi)) zoom(-2,0,4,4) as 'FLUX DENSITY B'
+  203|     vector(H) as 'Vector Plot of magnetic field intensity H (A/m)' PNG
+  204|     vector(B) as 'Vector plot of the Manetic Flux Density B (T)' PNG
+  205|     vector(Aphi)  as 'VECTOR PLOT OF MAGNETIC POTENTIAL' PNG
+  206|     contour(Aphi)  as 'MAGNETIC POTENTIAL' PNG
+  207|     contour(Aphi) zoom(-2,0,4,4)  as 'MAGNETIC POTENTIAL'
+  208|     
+  209|     surface(Aphi)  as 'MAGNETIC POTENTIAL'  viewpoint (-1,1,30)
+  210|     
+  211| Summary
+  212|     !report (GlobalMax(Bmag, 1)) as 'Maximum flux density  (Wb/m^2)'
+  213|     !report (GlobalMax(Bmag, 2)) as 'Maximum flux density in the wire (Wb/m^2)'
+  214|     report (GlobalMax(Bmag, 3)) as 'Maximum flux density in the skin (Wb/m^2)'
+  215|     report (GlobalMax(Bmag, 4)) as 'Maximum flux density in the fat (Wb/m^2)'
+  216|     report (GlobalMax(Bmag, 5)) as 'Maximum flux density in the muscle (Wb/m^2)'
+  217|     
+  218|     !report (GlobalMax(Hmag, 1)) as 'Maximum Magnetic Field intensity (A/m)'
+  219|     !report (GlobalMax(Hmag, 2)) as 'Maximum Magnetic Field intensity in the wire (A/m)'
+  220|     report (GlobalMax(Hmag, 3)) as 'Maximum Magnetic Field intensity in the skin (A/m)'
+  221|     report (GlobalMax(Hmag, 4)) as 'Maximum Magnetic Field intensity in the fat (A/m)'
+  222|     report (GlobalMax(Hmag, 5)) as 'Maximum Magnetic Field intensity in the muscle (A/m)'
+  223| end "CIEPcbP1p8UrD0Ykk9rG4yeq+J6b384kTZRnemmylDzh4NSeLTdnTMCRkOBMoS23tpclJAzvcbEpb3QAb6K7Qovjmwqs32XquSq7Zn/zuZvD0C8taSgsHPSQzqwzfwJ8wpGqtCfyHAV+cyJ02PPcvZ8Sc5HVbAp95qxUD3S3CqH"
+LOG Threads=1 Order=3 Speed=1 Stability=0
+Uorder=3
+ APHI order=3
+FlexPDE Professional Version 7.07/W64 3D
+Copyright © 1996-2017 PDE Solutions Inc.
+FlexPDE Professional Version 7.07/W64 3D
+Copyright © 1996-2017 PDE Solutions Inc.
+
+SUMMARIZE 37 PARAMETERS (NO COMMON SUBEXPRESSION ELIMINATION)
+   Param         Compartment       Complexity     Memory
+--------------------------------------------------------------
+             LX      0                    1         80
+             LY      0                    1         80
+            MU0      0                    1         80
+             MU      1                    1         80
+             MU      2                    1         80
+             MU      3                    1         80
+             MU      4                    1         80
+             MU      5                    1         80
+             MU      6                    1         80
+             MU      7                    1         80
+             MU      8                    1         80
+             MU      9                    1         80
+             MU     10                    1         80
+              J      1                    1         80
+              J      2                    1         80
+              J      3                    1         80
+              J      4                    1         80
+              J      5                    1         80
+              J      6                    1         80
+              J      7                    1         80
+              J      8                    1         80
+              J      9                    1         80
+              J     10                    1         80
+            RMU      1                    1         80
+            RMU      2                    1         80
+            RMU      3                    1         80
+            RMU      4                    1         80
+            RMU      5                    1         80
+            RMU      6                    1         80
+            RMU      7                    1         80
+            RMU      8                    1         80
+            RMU      9                    1         80
+            RMU     10                    1         80
+          NUDGE      0                    1         80
+    WIRE_LENGTH      0                    1         80
+        PEN_LEN      0                    1         80
+            STH      0                    1         80
+             AR      0                    1         80
+            FTH      0                    1         80
+            MTH      0                    1         80
+            DCB      0                    1         80
+          DCANB      0                    1         80
+       MUU_SKIN      0                    1         80
+     MUU_MUSCLE      0                    1         80
+        MUU_FAT      0                    1         80
+         MUU_CB      0                    1         80
+       MUU_CANB      0                    1         80
+         MUU_IN      0                    1         80
+        MUU_OUT      0                    1         80
+         MUU_DI      0                    1         80
+          SCALE      0                    1         80
+       WIRE_RAD      0                    1         80
+        COP_OUT      0                    1         80
+         DI_S_D      0                    1         80
+         COP_IN      0                    1         80
+           HOLE      0                    1         80
+        CURRENT      0                    1         80
+CURRENT_DENSITY      0                    1         80
+             BZ      0                    5        400
+             BR      0                    1         80
+           BMAG      0                   10        800
+              H      1                   15       1200
+              H      2                   15       1200
+              H      3                   15       1200
+              H      4                   15       1200
+              H      5                   15       1200
+              H      6                   15       1200
+              H      7                   15       1200
+              H      8                   15       1200
+              H      9                   15       1200
+              H     10                   15       1200
+           HMAG      1                   16       1280
+           HMAG      2                   16       1280
+           HMAG      3                   16       1280
+           HMAG      4                   16       1280
+           HMAG      5                   16       1280
+           HMAG      6                   16       1280
+           HMAG      7                   16       1280
+           HMAG      8                   16       1280
+           HMAG      9                   16       1280
+           HMAG     10                   16       1280
+              B      0                    9        720
+
+--------------------------
+SUMMARIZE EQUATIONS
+--------------------------
+           DEFINES               DEPENDS                    BASE         CSE
+ EQUATION    VAR    COMPARTMENT    VAR       FUNCTION     COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------------------------------
+     1       APHI          1                       Source          1            2          160
+     1       APHI          1                     Galerkin         26           26         2080
+     1       APHI          1         APHI        Jacobian         26           26         2080
+     1       APHI          1                Surf Galerkin         16           16         1280
+     1       APHI          1         APHI   Surf Jacobian         16           16         1280
+     1       APHI          2                       Source          1            2          160
+     1       APHI          2                     Galerkin         26           26         2080
+     1       APHI          2         APHI        Jacobian         26           26         2080
+     1       APHI          2                Surf Galerkin         16           16         1280
+     1       APHI          2         APHI   Surf Jacobian         16           16         1280
+     1       APHI          3                       Source          1            2          160
+     1       APHI          3                     Galerkin         26           26         2080
+     1       APHI          3         APHI        Jacobian         26           26         2080
+     1       APHI          3                Surf Galerkin         16           16         1280
+     1       APHI          3         APHI   Surf Jacobian         16           16         1280
+     1       APHI          4                       Source          1            2          160
+     1       APHI          4                     Galerkin         26           26         2080
+     1       APHI          4         APHI        Jacobian         26           26         2080
+     1       APHI          4                Surf Galerkin         16           16         1280
+     1       APHI          4         APHI   Surf Jacobian         16           16         1280
+     1       APHI          5                       Source          1            2          160
+     1       APHI          5                     Galerkin         26           26         2080
+     1       APHI          5         APHI        Jacobian         26           26         2080
+     1       APHI          5                Surf Galerkin         16           16         1280
+     1       APHI          5         APHI   Surf Jacobian         16           16         1280
+     1       APHI          6                       Source          1            2          160
+     1       APHI          6                     Galerkin         26           26         2080
+     1       APHI          6         APHI        Jacobian         26           26         2080
+     1       APHI          6                Surf Galerkin         16           16         1280
+     1       APHI          6         APHI   Surf Jacobian         16           16         1280
+     1       APHI          7                       Source          1            2          160
+     1       APHI          7                     Galerkin         26           26         2080
+     1       APHI          7         APHI        Jacobian         26           26         2080
+     1       APHI          7                Surf Galerkin         16           16         1280
+     1       APHI          7         APHI   Surf Jacobian         16           16         1280
+     1       APHI          8                       Source          3            4          320
+     1       APHI          8                     Galerkin         26           26         2080
+     1       APHI          8         APHI        Jacobian         26           26         2080
+     1       APHI          8                Surf Galerkin         16           16         1280
+     1       APHI          8         APHI   Surf Jacobian         16           16         1280
+     1       APHI          9                       Source          1            2          160
+     1       APHI          9                     Galerkin         26           26         2080
+     1       APHI          9         APHI        Jacobian         26           26         2080
+     1       APHI          9                Surf Galerkin         16           16         1280
+     1       APHI          9         APHI   Surf Jacobian         16           16         1280
+     1       APHI         10                       Source          3            4          320
+     1       APHI         10                     Galerkin         26           26         2080
+     1       APHI         10         APHI        Jacobian         26           26         2080
+     1       APHI         10                Surf Galerkin         16           16         1280
+     1       APHI         10         APHI   Surf Jacobian         16           16         1280
+
+EQUATION 1 PARAMETER DEPENDENCIES:
+ MU0             MU              J               RMU             MUU_SKIN       
+ MUU_MUSCLE      MUU_FAT         MUU_CB          MUU_CANB        MUU_IN         
+ MUU_OUT         MUU_DI          SCALE           WIRE_RAD        CURRENT        
+ CURRENT_DENSITY 
+
+BOUNDARY CONDITION TAGS with associated BC INDEX
+
+BOUNDARY CONDITION FORMULAS [BCINDEX]
+
+--------------------------
+SUMMARIZE BOUNDARY CONDITIONS
+--------------------------
+    BC      DEFINES   COMPARTMENT     DEPENDS     FUNCTION     COMPLEXITY    MEMORY
+----------------------------------------------------------------------
+
+--------------------------------
+SUMMARIZE FITS AND INTEGRALS
+---------------------------------
+                             REGION/       BASE        CSE
+    FIT         KIND       COMPARTMENT  COMPLEXITY  COMPLEXITY  MEMORY  DEPENDENCY
+-----------------------------------------------------------------------------------------
+     1            GlobalMax       3          10         10        800    APHI
+     2            GlobalMax       4          10         10        800    APHI
+     3            GlobalMax       5          10         10        800    APHI
+     4            GlobalMax       3          16         17       1360    APHI
+     5            GlobalMax       4          16         17       1360    APHI
+     6            GlobalMax       5          16         17       1360    APHI
+
+-------------------------------
+SUMMARIZE PLOT EQUATIONS
+-------------------------------
+                                     BASE        CSE
+   PLOT    ARGUMENT COMPARTMENT  COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------
+     1          1          1          5          5          400
+     1          1          2          5          5          400
+     1          1          3          5          5          400
+     1          1          4          5          5          400
+     1          1          5          5          5          400
+     1          1          6          5          5          400
+     1          1          7          5          5          400
+     1          1          8          5          5          400
+     1          1          9          5          5          400
+     1          1         10          5          5          400
+     2          1          1          1          1           80
+     2          1          2          1          1           80
+     2          1          3          1          1           80
+     2          1          4          1          1           80
+     2          1          5          1          1           80
+     2          1          6          1          1           80
+     2          1          7          1          1           80
+     2          1          8          1          1           80
+     2          1          9          1          1           80
+     2          1         10          1          1           80
+     3          1          1          1          1           80
+     3          1          2          1          1           80
+     3          1          3          1          1           80
+     3          1          4          1          1           80
+     3          1          5          1          1           80
+     3          1          6          1          1           80
+     3          1          7          1          1           80
+     3          1          8          1          1           80
+     3          1          9          1          1           80
+     3          1         10          1          1           80
+     3          2          1          1          1           80
+     3          2          2          1          1           80
+     3          2          3          1          1           80
+     3          2          4          1          1           80
+     3          2          5          1          1           80
+     3          2          6          1          1           80
+     3          2          7          1          1           80
+     3          2          8          1          1           80
+     3          2          9          1          1           80
+     3          2         10          1          1           80
+     4          1          1          5          5          400
+     4          1          2          5          5          400
+     4          1          3          5          5          400
+     4          1          4          5          5          400
+     4          1          5          5          5          400
+     4          1          6          5          5          400
+     4          1          7          5          5          400
+     4          1          8          5          5          400
+     4          1          9          5          5          400
+     4          1         10          5          5          400
+     5          1          1          5          5          400
+     5          1          2          5          5          400
+     5          1          3          5          5          400
+     5          1          4          5          5          400
+     5          1          5          5          5          400
+     5          1          6          5          5          400
+     5          1          7          5          5          400
+     5          1          8          5          5          400
+     5          1          9          5          5          400
+     5          1         10          5          5          400
+     6          1          1         10         10          800
+     6          1          2         10         10          800
+     6          1          3         10         10          800
+     6          1          4         10         10          800
+     6          1          5         10         10          800
+     6          1          6         10         10          800
+     6          1          7         10         10          800
+     6          1          8         10         10          800
+     6          1          9         10         10          800
+     6          1         10         10         10          800
+     7          1          1         16         17         1360
+     7          1          2         16         17         1360
+     7          1          3         16         17         1360
+     7          1          4         16         17         1360
+     7          1          5         16         17         1360
+     7          1          6         16         17         1360
+     7          1          7         16         17         1360
+     7          1          8         16         17         1360
+     7          1          9         16         17         1360
+     7          1         10         16         17         1360
+     8          1          1          1          1           80
+     8          1          2          1          1           80
+     8          1          3          1          1           80
+     8          1          4          1          1           80
+     8          1          5          1          1           80
+     8          1          6          1          1           80
+     8          1          7          1          1           80
+     8          1          8          1          1           80
+     8          1          9          1          1           80
+     8          1         10          1          1           80
+     8          2          1          1          1           80
+     8          2          2          1          1           80
+     8          2          3          1          1           80
+     8          2          4          1          1           80
+     8          2          5          1          1           80
+     8          2          6          1          1           80
+     8          2          7          1          1           80
+     8          2          8          1          1           80
+     8          2          9          1          1           80
+     8          2         10          1          1           80
+     8          3          1          3          3          240
+     8          3          2          3          3          240
+     8          3          3          3          3          240
+     8          3          4          3          3          240
+     8          3          5          3          3          240
+     8          3          6          3          3          240
+     8          3          7          3          3          240
+     8          3          8          3          3          240
+     8          3          9          3          3          240
+     8          3         10          3          3          240
+     8          4          1          5          5          400
+     8          4          2          5          5          400
+     8          4          3          5          5          400
+     8          4          4          5          5          400
+     8          4          5          5          5          400
+     8          4          6          5          5          400
+     8          4          7          5          5          400
+     8          4          8          5          5          400
+     8          4          9          5          5          400
+     8          4         10          5          5          400
+     8          5          1          5          5          400
+     8          5          2          5          5          400
+     8          5          3          5          5          400
+     8          5          4          5          5          400
+     8          5          5          5          5          400
+     8          5          6          5          5          400
+     8          5          7          5          5          400
+     8          5          8          5          5          400
+     8          5          9          5          5          400
+     8          5         10          5          5          400
+     9          1          1          8          8          640
+     9          1          2          8          8          640
+     9          1          3          8          8          640
+     9          1          4          8          8          640
+     9          1          5          8          8          640
+     9          1          6          8          8          640
+     9          1          7          8          8          640
+     9          1          8          8          8          640
+     9          1          9          8          8          640
+     9          1         10          8          8          640
+    10          1          1          8          8          640
+    10          1          2          8          8          640
+    10          1          3          8          8          640
+    10          1          4          8          8          640
+    10          1          5          8          8          640
+    10          1          6          8          8          640
+    10          1          7          8          8          640
+    10          1          8          8          8          640
+    10          1          9          8          8          640
+    10          1         10          8          8          640
+    11          1          1         15         16         1280
+    11          1          2         15         16         1280
+    11          1          3         15         16         1280
+    11          1          4         15         16         1280
+    11          1          5         15         16         1280
+    11          1          6         15         16         1280
+    11          1          7         15         16         1280
+    11          1          8         15         16         1280
+    11          1          9         15         16         1280
+    11          1         10         15         16         1280
+    12          1          1          9          9          720
+    12          1          2          9          9          720
+    12          1          3          9          9          720
+    12          1          4          9          9          720
+    12          1          5          9          9          720
+    12          1          6          9          9          720
+    12          1          7          9          9          720
+    12          1          8          9          9          720
+    12          1          9          9          9          720
+    12          1         10          9          9          720
+    13          1          1          1          1           80
+    13          1          2          1          1           80
+    13          1          3          1          1           80
+    13          1          4          1          1           80
+    13          1          5          1          1           80
+    13          1          6          1          1           80
+    13          1          7          1          1           80
+    13          1          8          1          1           80
+    13          1          9          1          1           80
+    13          1         10          1          1           80
+    14          1          1          1          1           80
+    14          1          2          1          1           80
+    14          1          3          1          1           80
+    14          1          4          1          1           80
+    14          1          5          1          1           80
+    14          1          6          1          1           80
+    14          1          7          1          1           80
+    14          1          8          1          1           80
+    14          1          9          1          1           80
+    14          1         10          1          1           80
+    15          1          1          1          1           80
+    15          1          2          1          1           80
+    15          1          3          1          1           80
+    15          1          4          1          1           80
+    15          1          5          1          1           80
+    15          1          6          1          1           80
+    15          1          7          1          1           80
+    15          1          8          1          1           80
+    15          1          9          1          1           80
+    15          1         10          1          1           80
+    16          1          1          1          1           80
+    16          1          2          1          1           80
+    16          1          3          1          1           80
+    16          1          4          1          1           80
+    16          1          5          1          1           80
+    16          1          6          1          1           80
+    16          1          7          1          1           80
+    16          1          8          1          1           80
+    16          1          9          1          1           80
+    16          1         10          1          1           80
+
+==UNUSED== PARAMETER DEFINITIONS:
+ NUDGE           DI_S_D         
+
+Uorder=3
+ APHI order=3
+Orthomin/ILU FINAL ITERATION 24 of 1000 RNORM=1.69944e-005 XNORM=145.221 Flag=0 MS=9
+Orthomin/ILU FINAL ITERATION 25 of 1000 RNORM=6.05505e-012 XNORM=7.63837e-005 Flag=0 MS=6
+Orthomin/ILU FINAL ITERATION 27 of 1000 RNORM=9.25173e-019 XNORM=3.11832e-011 Flag=0 MS=7
+RMS Spatial Errors   0.002468
+-----Called from fit::find_minmax
+-----Called from fit::validate_fit
+-----Called from fit::validate_fits
+-----Called from doplot::do_plot
+-----Called from doplot::show_plots
+-----Called from control::do_finalplots
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+Table 0000000002E4F450
+Divide by Zero
+|       / |      R  
+          |   APHI  
+----------------------------------------
+
+Parse_Error
+|       / |      R  
+          |   APHI  
+----------------------------------------
+Parse_Error at Line 106 Cols 15-18
+ in file C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde
+Divide by Zero
+-----Called from fit::find_minmax
+-----Called from fit::validate_fit
+-----Called from fit::validate_fits
+-----Called from doplot::do_plot
+-----Called from doplot::show_plots
+-----Called from control::do_finalplots
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+Parse_Error Catches RTException stop_parse(100,0000000006BA8AB0,0000000002EE3150)
+errmsg: Divide by Zero
+Trace:
+-----Called from fit::find_minmax
+-----Called from fit::validate_fit
+-----Called from fit::validate_fits
+-----Called from doplot::do_plot
+-----Called from doplot::show_plots
+-----Called from control::do_finalplots
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+PDEThread Catches RTException stop_parse(100,0000000006BA8AB0,0000000002EE3150)
+errmsg: Divide by Zero
+Trace:
+-----Called from fit::find_minmax
+-----Called from fit::validate_fit
+-----Called from fit::validate_fits
+-----Called from doplot::do_plot
+-----Called from doplot::show_plots
+-----Called from control::do_finalplots
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from fpdemain
+
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\cw3_model1.pde 12:47:48 5/2/21
+================================================================
+    1| { MAGNET_COIL.PDE  
+    2|   
+    3| 
+    4|  
+    5|   According to Maxwell's equations, 
+    6|         curl H = J 
+    7|         div B = 0 
+    8|         B = mu*H or H = B/mu
+    9|  
+   10|   where B is the manetic flux density
+   11|         H is the magnetic field strength
+   12|         J is the electric current density
+   13|   and  mu is the magnetic permeability of the material.
+   14|  
+   15|   The magnetic vector potential A is related to B by 
+   16|         B = curl A 
+   17|   therefore 
+   18|         curl( (1/mu)*curl A ) = J
+   19|     if rmu = 1/mu
+   20|     then 
+   21|           curl( (rmu)*curl A ) = J    
+   22|  
+   23|   This equation is usually supplmented with the Coulomb Gauge condition 
+   24|         div A = 0.
+   25|  
+   26|   In the axisymmetric case, the current is assumed to flow only in the
+   27|   azimuthal direction, and only the azimuthal component of the vector
+   28|   potential is present.  Henceforth, we will simply refer to this component as A.
+   29|  
+   30|   The Coulomb Gauge is identically satisfied, and the PDE to be solved in this
+   31|   model takes the form 
+   32|         curl((1/mu)*curl (A)) = J(x,y)     in the domain
+   33|                            A  = g(x,y)     on the boundary.
+   34|  
+   35|   The magnetic induction B takes the simple form 
+   36|         B = (-dz(A), 0, dr(A)+A/r)
+   37|  
+   38|   and the magnetic field is given by 
+   39|         H = (-dz(A)/mu, 0, (dr(A)+A/r)/mu)
+   40|  
+   41|   Expanding the equation in cylindrical geometry results in the final equation, 
+   42|         dz(dz(A)/mu) + dr((dr(A)+A/r)/mu) = -J
+   43|  
+   44|   The interpretation of the natural boundary condition becomes 
+   45|         Natural(A) = n X H
+   46|  
+   47|   where n is the outward surface-normal unit vector.
+   48|  
+   49|   Across boundaries between regions of different material properties, the
+   50|   continuity of (n X H) assumed by the Galerkin solver implies that the
+   51|   tangential component of H is continuous, as required by the physics.
+   52|  
+   53|  
+   54|   In this simple test problem, we consider a circular coil whose axis of
+   55|   rotation lies along the X-axis. We bound the coil by a distant spherical
+   56|   surface at which we specify a boundary condition (n X H) = 0.
+   57|   At the axis, we use a Dirichlet boundary condition A=0.
+   58|  
+   59| }
+   60|  
+   61| title 'AXI-SYMMETRIC MAGNETIC FIELD'
+   62|  
+   63| coordinates
+   64|     { Cylindrical coordinates, with cylinder axis along Cartesian X direction }
+   65|     xcylinder(Z,R)  
+   66|  
+   67| variables
+   68|     Aphi        { the azimuthal component of the  vector potential }
+   69|  
+   70| definitions
+   71|    Lx =0.1
+   72|    Ly = 0.1
+   73|     mu0 = pi *4e-7            { the permeability }
+   74|     mu 
+   75|     J = 0              { the source defaults to zero }
+   76|     rmu = 1/ mu
+   77|     nudge = 0.0001
+   78|     wire_length = 0.02
+   79|     pen_len = 1.5/100
+   80|     
+   81|     sth =0.0015                                                                                                   ! Thickness of the skin
+   82|     ar = 0.05                                                                                                        ! radius of the arm
+   83|     fth = 0.0085                                                                                                   ! Thickness of the Fat 
+   84|     mth=0.0275                                                                                                   ! Thickness of muscle 
+   85|     dcb =0.6/100
+   86|     dcanb = ar - sth - mth - fth - dcb 
+   87|     ! Radius  of the wire
+   88|     muu_skin = pi *4e-7 
+   89|     muu_muscle=pi *4e-7 
+   90|     muu_fat = pi *4e-7 
+   91|     muu_cb =  pi *4e-7 
+   92|     muu_canb =  pi *4e-7 
+   93|     muu_in = pi *4e-7 
+   94|     muu_out = pi *4e-7 
+   95|     muu_di = pi *4e-7 
+   96|     scale = 1
+   97|     
+   98|      wire_rad = (8.44e-3) * scale
+   99|      cop_out = (6.3e-3 - 4.7e-3)* scale                                                               !thickness of outside component
+  100|      di_s_d = (4.7e-3 - 0.7e-3) * scale                                                                 !thickness of dielectric
+  101|      cop_in = (1.8e-3) * scale
+  102|      hole = wire_rad - cop_in - di_s_d -cop_out
+  103|   
+  104|     current = 2.14
+  105|     current_density = current/(pi*wire_rad^2)
+  106|     Bz = dr(r*Aphi)/r                                                                                       ! The Z-component of the Flux density
+  107|     Br = dz(Aphi)                                                                                            ! The R-component of the Flux density Note: the phi-component
+  108|     Bmag = sqrt(Bz^2 + Br^2)                                                                         ! The Magnitude of the flux density
+  109|     H = curl(Aphi)/mu                                                                                      ! The magnetic field strength
+  110|     Hmag = magnitude(H)                                                                               ! The magnitude magnetic field strength
+  111|     B = curl(Aphi)                                                                                            ! The magnetic flux density
+  112|     !Bmag = magnitude(B)
+  113|     !J1 = curl(H)
+  114| initial values
+  115|     Aphi = 2            { unimportant unless mu varies with H }
+  116|  
+  117| equations
+  118|     { FlexPDE expands CURL in proper coordinates }
+  119|     Aphi : curl(rmu*curl(Aphi)) = J 
+  120|  
+  121| boundaries
+  122|     region 1 'Domain'
+  123|      mu = mu0
+  124|        START 'ring' ( -Lx , 0)
+  125|            line to (Lx,0)
+  126|            line to (Lx, Ly)
+  127|            line to (-Lx, Ly)
+  128|            line to close 
+  129|     
+  130|     region 2 'Skin'
+  131|     	mu = muu_skin
+  132|         start (0, ar)
+  133|         line to (sth,  ar) to (sth,  0) to (0, 0) to close
+  134|         
+  135|    region 3 'Fat'
+  136|     	mu = muu_fat
+  137|         start (sth, ar)
+  138|         line to (sth + fth,  ar) to (sth + fth,  0) to (sth, 0) to close
+  139|         
+  140|     region 4 'Muscle'
+  141|     	mu = muu_muscle 
+  142|         start (sth + fth, ar)
+  143|         line to (sth + fth + mth,  ar) to (sth + fth + mth,  0) to (sth + fth, 0) to close
+  144|         
+  145|     region 5 'Cortical Bone'
+  146|     	mu = muu_cb
+  147|         start (sth + fth + mth, ar)
+  148|         line to (sth + fth + mth + dcb,  ar) to (sth + fth + mth + dcb,  0) to (sth + fth + mth, 0) to close
+  149|         
+  150|     region 6 'Cancellous Bone'
+  151|     	mu = muu_canb
+  152|         start (sth + fth + mth +dcb, ar)
+  153|         line to (sth + fth + mth + dcb + dcanb,  ar) to (sth + fth + mth + dcb + dcanb,  0) to (sth + fth + mth + dcb, 0) to close
+  154|         
+  155|     region 7 'Hole'
+  156|         mu = mu0
+  157|        START 'ring' (pen_len , hole)
+  158|            line to (pen_len, 0)
+  159|            line to (-wire_length , 0)
+  160|            line to (-wire_length ,  hole)
+  161|            line to close 
+  162|            
+  163|     region 8 'Terminal'
+  164|         mu = muu_in
+  165|         J = current_density
+  166|        START 'ring' (pen_len , hole + cop_in)
+  167|            line to (pen_len, hole)
+  168|            line to (-wire_length , hole)
+  169|            line to (-wire_length ,  hole + cop_in)
+  170|            line to close 
+  171|         
+  172|     region 9 'Dielectric'
+  173|         mu = muu_di
+  174|        START 'ring' (pen_len , wire_rad )
+  175|            line to (pen_len, cop_in)
+  176|            line to (-wire_length , cop_in)
+  177|            line to (-wire_length ,  wire_rad)
+  178|            line to close 
+  179|            
+  180|     region 10 'Ground'
+  181|         mu = muu_out
+  182|         J = -current_density
+  183|        START 'ring' (pen_len, wire_rad)
+  184|            line to (pen_len, wire_rad - cop_out)
+  185|            line to (0 , wire_rad - cop_out)
+  186|            line to (0 ,  wire_rad)
+  187|            line to close 
+  188|            
+  189| monitors
+  190|     contour(Bz) zoom(-2,0,4,4) as 'FLUX DENSITY B'
+  191|     contour(Aphi) as 'Potential'
+  192|  
+  193| plots
+  194|     grid(z,r)
+  195|     contour(Bz)  as 'FLUX DENSITY B'
+  196|     contour(Bz) zoom(-2,0,4,4)  as 'FLUX DENSITY B'
+  197|     contour(Bmag) as 'Magnitude of the Flux Density (T)' PNG
+  198|     contour(Hmag) as  'Magnitude of Field intensity (A/m)' PNG
+  199|     elevation(Aphi,dr(Aphi),Aphi/r,dr(Aphi)+Aphi/r,Aphi+r*dr(Aphi)) 
+  200|         from (0,0) to (0,1) as 'Bz'
+  201|     vector(dr(Aphi)+Aphi/r,-dz(Aphi)) as 'FLUX DENSITY B'
+  202|     vector(dr(Aphi)+Aphi/r,-dz(Aphi)) zoom(-2,0,4,4) as 'FLUX DENSITY B'
+  203|     vector(H) as 'Vector Plot of magnetic field intensity H (A/m)' PNG
+  204|     vector(B) as 'Vector plot of the Manetic Flux Density B (T)' PNG
+  205|     vector(Aphi)  as 'VECTOR PLOT OF MAGNETIC POTENTIAL' PNG
+  206|     contour(Aphi)  as 'MAGNETIC POTENTIAL' PNG
+  207|     contour(Aphi) zoom(-2,0,4,4)  as 'MAGNETIC POTENTIAL'
+  208|     
+  209|     surface(Aphi)  as 'MAGNETIC POTENTIAL'  viewpoint (-1,1,30)
+  210|     
+  211| {Summary
+  212|     !report (GlobalMax(Bmag, 1)) as 'Maximum flux density  (Wb/m^2)'
+  213|     !report (GlobalMax(Bmag, 2)) as 'Maximum flux density in the wire (Wb/m^2)'
+  214|     report (GlobalMax(Bmag, 3)) as 'Maximum flux density in the skin (Wb/m^2)'
+  215|     report (GlobalMax(Bmag, 4)) as 'Maximum flux density in the fat (Wb/m^2)'
+  216|     report (GlobalMax(Bmag, 5)) as 'Maximum flux density in the muscle (Wb/m^2)'
+  217|     
+  218|     !report (GlobalMax(Hmag, 1)) as 'Maximum Magnetic Field intensity (A/m)'
+  219|     !report (GlobalMax(Hmag, 2)) as 'Maximum Magnetic Field intensity in the wire (A/m)'
+  220|     report (GlobalMax(Hmag, 3)) as 'Maximum Magnetic Field intensity in the skin (A/m)'
+  221|     report (GlobalMax(Hmag, 4)) as 'Maximum Magnetic Field intensity in the fat (A/m)'
+  222|     report (GlobalMax(Hmag, 5)) as 'Maximum Magnetic Field intensity in the muscle (A/m)'
+  223| }end "CIEPcbP1p8UrD0Ykk9rG4yeq+J6b384kTZRnemmylDzh4NSeLTdnTMCRkOBMoS23tpclJAzvcbEpb3QAb6K7Qovjmwqs32XquSq7Zn/zuZvD0C8taSgsHPSQzqwzfwJ8wpGqtCfyHAV+cyJ02PPcvZ8Sc5HVbAp95qxUD3S3CqH"
+LOG Threads=1 Order=3 Speed=1 Stability=0
+Uorder=3
+ APHI order=3
+IMPORTMESH(0) NDIM=2 NB=10 NAB=3 NODES=496 CELLS=915 SIDES=1410 LEGS=0 imaging=0 time(0)=0
+Import Mesh Time=9 ms
+
+SUMMARIZE 37 PARAMETERS (NO COMMON SUBEXPRESSION ELIMINATION)
+   Param         Compartment       Complexity     Memory
+--------------------------------------------------------------
+             LX      0                    1         80
+             LY      0                    1         80
+            MU0      0                    1         80
+             MU      1                    1         80
+             MU      2                    1         80
+             MU      3                    1         80
+             MU      4                    1         80
+             MU      5                    1         80
+             MU      6                    1         80
+             MU      7                    1         80
+             MU      8                    1         80
+             MU      9                    1         80
+             MU     10                    1         80
+              J      1                    1         80
+              J      2                    1         80
+              J      3                    1         80
+              J      4                    1         80
+              J      5                    1         80
+              J      6                    1         80
+              J      7                    1         80
+              J      8                    1         80
+              J      9                    1         80
+              J     10                    1         80
+            RMU      1                    1         80
+            RMU      2                    1         80
+            RMU      3                    1         80
+            RMU      4                    1         80
+            RMU      5                    1         80
+            RMU      6                    1         80
+            RMU      7                    1         80
+            RMU      8                    1         80
+            RMU      9                    1         80
+            RMU     10                    1         80
+          NUDGE      0                    1         80
+    WIRE_LENGTH      0                    1         80
+        PEN_LEN      0                    1         80
+            STH      0                    1         80
+             AR      0                    1         80
+            FTH      0                    1         80
+            MTH      0                    1         80
+            DCB      0                    1         80
+          DCANB      0                    1         80
+       MUU_SKIN      0                    1         80
+     MUU_MUSCLE      0                    1         80
+        MUU_FAT      0                    1         80
+         MUU_CB      0                    1         80
+       MUU_CANB      0                    1         80
+         MUU_IN      0                    1         80
+        MUU_OUT      0                    1         80
+         MUU_DI      0                    1         80
+          SCALE      0                    1         80
+       WIRE_RAD      0                    1         80
+        COP_OUT      0                    1         80
+         DI_S_D      0                    1         80
+         COP_IN      0                    1         80
+           HOLE      0                    1         80
+        CURRENT      0                    1         80
+CURRENT_DENSITY      0                    1         80
+             BZ      0                    5        400
+             BR      0                    1         80
+           BMAG      0                   10        800
+              H      1                   15       1200
+              H      2                   15       1200
+              H      3                   15       1200
+              H      4                   15       1200
+              H      5                   15       1200
+              H      6                   15       1200
+              H      7                   15       1200
+              H      8                   15       1200
+              H      9                   15       1200
+              H     10                   15       1200
+           HMAG      1                   16       1280
+           HMAG      2                   16       1280
+           HMAG      3                   16       1280
+           HMAG      4                   16       1280
+           HMAG      5                   16       1280
+           HMAG      6                   16       1280
+           HMAG      7                   16       1280
+           HMAG      8                   16       1280
+           HMAG      9                   16       1280
+           HMAG     10                   16       1280
+              B      0                    9        720
+
+--------------------------
+SUMMARIZE EQUATIONS
+--------------------------
+           DEFINES               DEPENDS                    BASE         CSE
+ EQUATION    VAR    COMPARTMENT    VAR       FUNCTION     COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------------------------------
+     1       APHI          1                       Source          1            2          160
+     1       APHI          1                     Galerkin         26           26         2080
+     1       APHI          1         APHI        Jacobian         26           26         2080
+     1       APHI          1                Surf Galerkin         16           16         1280
+     1       APHI          1         APHI   Surf Jacobian         16           16         1280
+     1       APHI          2                       Source          1            2          160
+     1       APHI          2                     Galerkin         26           26         2080
+     1       APHI          2         APHI        Jacobian         26           26         2080
+     1       APHI          2                Surf Galerkin         16           16         1280
+     1       APHI          2         APHI   Surf Jacobian         16           16         1280
+     1       APHI          3                       Source          1            2          160
+     1       APHI          3                     Galerkin         26           26         2080
+     1       APHI          3         APHI        Jacobian         26           26         2080
+     1       APHI          3                Surf Galerkin         16           16         1280
+     1       APHI          3         APHI   Surf Jacobian         16           16         1280
+     1       APHI          4                       Source          1            2          160
+     1       APHI          4                     Galerkin         26           26         2080
+     1       APHI          4         APHI        Jacobian         26           26         2080
+     1       APHI          4                Surf Galerkin         16           16         1280
+     1       APHI          4         APHI   Surf Jacobian         16           16         1280
+     1       APHI          5                       Source          1            2          160
+     1       APHI          5                     Galerkin         26           26         2080
+     1       APHI          5         APHI        Jacobian         26           26         2080
+     1       APHI          5                Surf Galerkin         16           16         1280
+     1       APHI          5         APHI   Surf Jacobian         16           16         1280
+     1       APHI          6                       Source          1            2          160
+     1       APHI          6                     Galerkin         26           26         2080
+     1       APHI          6         APHI        Jacobian         26           26         2080
+     1       APHI          6                Surf Galerkin         16           16         1280
+     1       APHI          6         APHI   Surf Jacobian         16           16         1280
+     1       APHI          7                       Source          1            2          160
+     1       APHI          7                     Galerkin         26           26         2080
+     1       APHI          7         APHI        Jacobian         26           26         2080
+     1       APHI          7                Surf Galerkin         16           16         1280
+     1       APHI          7         APHI   Surf Jacobian         16           16         1280
+     1       APHI          8                       Source          3            4          320
+     1       APHI          8                     Galerkin         26           26         2080
+     1       APHI          8         APHI        Jacobian         26           26         2080
+     1       APHI          8                Surf Galerkin         16           16         1280
+     1       APHI          8         APHI   Surf Jacobian         16           16         1280
+     1       APHI          9                       Source          1            2          160
+     1       APHI          9                     Galerkin         26           26         2080
+     1       APHI          9         APHI        Jacobian         26           26         2080
+     1       APHI          9                Surf Galerkin         16           16         1280
+     1       APHI          9         APHI   Surf Jacobian         16           16         1280
+     1       APHI         10                       Source          3            4          320
+     1       APHI         10                     Galerkin         26           26         2080
+     1       APHI         10         APHI        Jacobian         26           26         2080
+     1       APHI         10                Surf Galerkin         16           16         1280
+     1       APHI         10         APHI   Surf Jacobian         16           16         1280
+
+EQUATION 1 PARAMETER DEPENDENCIES:
+ MU0             MU              J               RMU             MUU_SKIN       
+ MUU_MUSCLE      MUU_FAT         MUU_CB          MUU_CANB        MUU_IN         
+ MUU_OUT         MUU_DI          SCALE           WIRE_RAD        CURRENT        
+ CURRENT_DENSITY 
+
+BOUNDARY CONDITION TAGS with associated BC INDEX
+
+BOUNDARY CONDITION FORMULAS [BCINDEX]
+
+--------------------------
+SUMMARIZE BOUNDARY CONDITIONS
+--------------------------
+    BC      DEFINES   COMPARTMENT     DEPENDS     FUNCTION     COMPLEXITY    MEMORY
+----------------------------------------------------------------------
+
+-------------------------------
+SUMMARIZE PLOT EQUATIONS
+-------------------------------
+                                     BASE        CSE
+   PLOT    ARGUMENT COMPARTMENT  COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------
+     1          1          1          5          5          400
+     1          1          2          5          5          400
+     1          1          3          5          5          400
+     1          1          4          5          5          400
+     1          1          5          5          5          400
+     1          1          6          5          5          400
+     1          1          7          5          5          400
+     1          1          8          5          5          400
+     1          1          9          5          5          400
+     1          1         10          5          5          400
+     2          1          1          1          1           80
+     2          1          2          1          1           80
+     2          1          3          1          1           80
+     2          1          4          1          1           80
+     2          1          5          1          1           80
+     2          1          6          1          1           80
+     2          1          7          1          1           80
+     2          1          8          1          1           80
+     2          1          9          1          1           80
+     2          1         10          1          1           80
+     3          1          1          1          1           80
+     3          1          2          1          1           80
+     3          1          3          1          1           80
+     3          1          4          1          1           80
+     3          1          5          1          1           80
+     3          1          6          1          1           80
+     3          1          7          1          1           80
+     3          1          8          1          1           80
+     3          1          9          1          1           80
+     3          1         10          1          1           80
+     3          2          1          1          1           80
+     3          2          2          1          1           80
+     3          2          3          1          1           80
+     3          2          4          1          1           80
+     3          2          5          1          1           80
+     3          2          6          1          1           80
+     3          2          7          1          1           80
+     3          2          8          1          1           80
+     3          2          9          1          1           80
+     3          2         10          1          1           80
+     4          1          1          5          5          400
+     4          1          2          5          5          400
+     4          1          3          5          5          400
+     4          1          4          5          5          400
+     4          1          5          5          5          400
+     4          1          6          5          5          400
+     4          1          7          5          5          400
+     4          1          8          5          5          400
+     4          1          9          5          5          400
+     4          1         10          5          5          400
+     5          1          1          5          5          400
+     5          1          2          5          5          400
+     5          1          3          5          5          400
+     5          1          4          5          5          400
+     5          1          5          5          5          400
+     5          1          6          5          5          400
+     5          1          7          5          5          400
+     5          1          8          5          5          400
+     5          1          9          5          5          400
+     5          1         10          5          5          400
+     6          1          1         10         10          800
+     6          1          2         10         10          800
+     6          1          3         10         10          800
+     6          1          4         10         10          800
+     6          1          5         10         10          800
+     6          1          6         10         10          800
+     6          1          7         10         10          800
+     6          1          8         10         10          800
+     6          1          9         10         10          800
+     6          1         10         10         10          800
+     7          1          1         16         17         1360
+     7          1          2         16         17         1360
+     7          1          3         16         17         1360
+     7          1          4         16         17         1360
+     7          1          5         16         17         1360
+     7          1          6         16         17         1360
+     7          1          7         16         17         1360
+     7          1          8         16         17         1360
+     7          1          9         16         17         1360
+     7          1         10         16         17         1360
+     8          1          1          1          1           80
+     8          1          2          1          1           80
+     8          1          3          1          1           80
+     8          1          4          1          1           80
+     8          1          5          1          1           80
+     8          1          6          1          1           80
+     8          1          7          1          1           80
+     8          1          8          1          1           80
+     8          1          9          1          1           80
+     8          1         10          1          1           80
+     8          2          1          1          1           80
+     8          2          2          1          1           80
+     8          2          3          1          1           80
+     8          2          4          1          1           80
+     8          2          5          1          1           80
+     8          2          6          1          1           80
+     8          2          7          1          1           80
+     8          2          8          1          1           80
+     8          2          9          1          1           80
+     8          2         10          1          1           80
+     8          3          1          3          3          240
+     8          3          2          3          3          240
+     8          3          3          3          3          240
+     8          3          4          3          3          240
+     8          3          5          3          3          240
+     8          3          6          3          3          240
+     8          3          7          3          3          240
+     8          3          8          3          3          240
+     8          3          9          3          3          240
+     8          3         10          3          3          240
+     8          4          1          5          5          400
+     8          4          2          5          5          400
+     8          4          3          5          5          400
+     8          4          4          5          5          400
+     8          4          5          5          5          400
+     8          4          6          5          5          400
+     8          4          7          5          5          400
+     8          4          8          5          5          400
+     8          4          9          5          5          400
+     8          4         10          5          5          400
+     8          5          1          5          5          400
+     8          5          2          5          5          400
+     8          5          3          5          5          400
+     8          5          4          5          5          400
+     8          5          5          5          5          400
+     8          5          6          5          5          400
+     8          5          7          5          5          400
+     8          5          8          5          5          400
+     8          5          9          5          5          400
+     8          5         10          5          5          400
+     9          1          1          8          8          640
+     9          1          2          8          8          640
+     9          1          3          8          8          640
+     9          1          4          8          8          640
+     9          1          5          8          8          640
+     9          1          6          8          8          640
+     9          1          7          8          8          640
+     9          1          8          8          8          640
+     9          1          9          8          8          640
+     9          1         10          8          8          640
+    10          1          1          8          8          640
+    10          1          2          8          8          640
+    10          1          3          8          8          640
+    10          1          4          8          8          640
+    10          1          5          8          8          640
+    10          1          6          8          8          640
+    10          1          7          8          8          640
+    10          1          8          8          8          640
+    10          1          9          8          8          640
+    10          1         10          8          8          640
+    11          1          1         15         16         1280
+    11          1          2         15         16         1280
+    11          1          3         15         16         1280
+    11          1          4         15         16         1280
+    11          1          5         15         16         1280
+    11          1          6         15         16         1280
+    11          1          7         15         16         1280
+    11          1          8         15         16         1280
+    11          1          9         15         16         1280
+    11          1         10         15         16         1280
+    12          1          1          9          9          720
+    12          1          2          9          9          720
+    12          1          3          9          9          720
+    12          1          4          9          9          720
+    12          1          5          9          9          720
+    12          1          6          9          9          720
+    12          1          7          9          9          720
+    12          1          8          9          9          720
+    12          1          9          9          9          720
+    12          1         10          9          9          720
+    13          1          1          1          1           80
+    13          1          2          1          1           80
+    13          1          3          1          1           80
+    13          1          4          1          1           80
+    13          1          5          1          1           80
+    13          1          6          1          1           80
+    13          1          7          1          1           80
+    13          1          8          1          1           80
+    13          1          9          1          1           80
+    13          1         10          1          1           80
+    14          1          1          1          1           80
+    14          1          2          1          1           80
+    14          1          3          1          1           80
+    14          1          4          1          1           80
+    14          1          5          1          1           80
+    14          1          6          1          1           80
+    14          1          7          1          1           80
+    14          1          8          1          1           80
+    14          1          9          1          1           80
+    14          1         10          1          1           80
+    15          1          1          1          1           80
+    15          1          2          1          1           80
+    15          1          3          1          1           80
+    15          1          4          1          1           80
+    15          1          5          1          1           80
+    15          1          6          1          1           80
+    15          1          7          1          1           80
+    15          1          8          1          1           80
+    15          1          9          1          1           80
+    15          1         10          1          1           80
+    16          1          1          1          1           80
+    16          1          2          1          1           80
+    16          1          3          1          1           80
+    16          1          4          1          1           80
+    16          1          5          1          1           80
+    16          1          6          1          1           80
+    16          1          7          1          1           80
+    16          1          8          1          1           80
+    16          1          9          1          1           80
+    16          1         10          1          1           80
+
+==UNUSED== PARAMETER DEFINITIONS:
+ NUDGE           DI_S_D         
+
+Uorder=3
+ APHI order=3
+Orthomin/ILU FINAL ITERATION 24 of 1000 RNORM=1.69944e-005 XNORM=145.221 Flag=0 MS=7
+Orthomin/ILU FINAL ITERATION 25 of 1000 RNORM=6.05495e-012 XNORM=7.63837e-005 Flag=0 MS=5
+Orthomin/ILU FINAL ITERATION 27 of 1000 RNORM=9.25152e-019 XNORM=3.1183e-011 Flag=0 MS=8
+RMS Spatial Errors   0.002468
+DO_NEXTSTAGE pde 00000000065D7810  MAXSTAGE=0

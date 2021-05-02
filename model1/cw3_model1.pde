@@ -72,14 +72,12 @@ definitions
    Ly = 0.1
     mu0 = pi *4e-7            { the permeability }
     mu 
-    J              { the source defaults to zero }
+    J = 0              { the source defaults to zero }
     rmu = 1/ mu
     nudge = 0.0001
     wire_length = 0.02
     pen_len = 1.5/100
     
-    a1 = 0.0179		                                                                                        ! Inner radius
-    a2 = 0.0214                                                                                                  ! outer Radius
     sth =0.0015                                                                                                   ! Thickness of the skin
     ar = 0.05                                                                                                        ! radius of the arm
     fth = 0.0085                                                                                                   ! Thickness of the Fat 
@@ -90,19 +88,18 @@ definitions
     muu_skin = pi *4e-7 
     muu_muscle=pi *4e-7 
     muu_fat = pi *4e-7 
-    muu_wire = pi *4e-7 
-    muu_pvc = pi *4e-7 
-    muu_cop_sh = pi *4e-7 
-    muu_di = pi *4e-7 
     muu_cb =  pi *4e-7 
     muu_canb =  pi *4e-7 
+    muu_in = pi *4e-7 
+    muu_out = pi *4e-7 
+    muu_di = pi *4e-7 
     scale = 1
-     pvc_s_d = (8.44/1000)/2 * scale
-     wire_rad = pvc_s_d * scale
-     cop_s_d = (6.3/1000)/2* scale
-     sil_s_d = (5/1000)/2 * scale
-     di_s_d = (4.7/1000)/2 * scale
-     cop_c_d = (0.74/1000)/2 * scale
+    
+     wire_rad = (8.44e-3) * scale
+     cop_out = (6.3e-3 - 4.7e-3)* scale                                                               !thickness of outside component
+     di_s_d = (4.7e-3 - 0.7e-3) * scale                                                                 !thickness of dielectric
+     cop_in = (1.8e-3) * scale
+     hole = wire_rad - cop_in - di_s_d -cop_out
   
     current = 2.14
     current_density = current/(pi*wire_rad^2)
@@ -122,107 +119,73 @@ equations
     Aphi : curl(rmu*curl(Aphi)) = J 
  
 boundaries
-    region 1
-    J = 0
+    region 1 'Domain'
      mu = mu0
        START 'ring' ( -Lx , 0)
-           line to (0,Lx)
-           line to (Ly, Lx)
-           line to (0, Ly)
-           line to close 
- 
-    region 2
-        mu = muu_wire
-        J = current_density
-       START 'ring' ( wire_rad +pen_len , wire_rad )
-           line to ( wire_rad + pen_len, 0)
-           line to (-wire_length , 0)
-           line to (-wire_length ,  wire_rad)
+           line to (Lx,0)
+           line to (Lx, Ly)
+           line to (-Lx, Ly)
            line to close 
     
-    region 3
-        J =0 
+    region 2 'Skin'
     	mu = muu_skin
-        start 'Skin'((a2-a1)/2,ar +nudge)
-        line to ((a2-a1)/2,  wire_rad ) to ((a2-a1)/2+sth,  wire_rad ) to ((a2-a1)/2+sth,ar+ nudge) to close
+        start (0, ar)
+        line to (sth,  ar) to (sth,  0) to (0, 0) to close
         
-   region 4
-        J  = 0
+   region 3 'Fat'
     	mu = muu_fat
-        start 'Fat'( (a2-a1)/2  +sth ,ar + nudge)
-        line to ((a2-a1)/2 + sth , wire_rad) to ((a2-a1)/2+ sth +fth, wire_rad) to ((a2-a1)/2 + sth +fth,ar+ nudge) to close
-    region 5
-         J = 0
+        start (sth, ar)
+        line to (sth + fth,  ar) to (sth + fth,  0) to (sth, 0) to close
+        
+    region 4 'Muscle'
     	mu = muu_muscle 
-        start 'Muscle'( (a2-a1)/2  +sth + fth ,ar + nudge)
-        line to ((a2-a1)/2 + sth + fth , wire_rad ) 
-        line to ((a2-a1)/2+ sth +fth+ mth,  wire_rad ) 
-        line to ((a2-a1)/2 + sth +fth +mth,ar + nudge) 
-        line to close
+        start (sth + fth, ar)
+        line to (sth + fth + mth,  ar) to (sth + fth + mth,  0) to (sth + fth, 0) to close
         
-          start 'Muscle'( pen_len+wire_rad, nudge)
-        line to (pen_len+wire_rad,  wire_rad ) 
-        line to ((a2-a1)/2+ sth +fth+ mth,   wire_rad ) 
-        line to ((a2-a1)/2 + sth +fth +mth, nudge) 
-        line to close
-        
-    region 6
-        mu = muu_pvc
-        J = 0 !current_density
-       START 'ring' ( wire_rad +pen_len , wire_rad )
-           line to ( wire_rad + pen_len, cop_s_d )
-           line to (-wire_length , cop_s_d)
-           line to (-wire_length ,  wire_rad)
-           line to close 
-   
-    region 7
-               mu = muu_cop_sh
-        J = current_density
-       START 'ring' ( wire_rad +pen_len , cop_s_d )
-           line to ( wire_rad + pen_len, di_s_d)
-           line to (-wire_length , di_s_d)
-           line to (-wire_length ,  cop_s_d)
-           line to close 
-           
-    region 8
-            mu = muu_di
-        J = current_density
-       START 'ring' ( wire_rad +pen_len , di_s_d )
-           line to ( wire_rad + pen_len, cop_c_d)
-           line to (-wire_length , cop_c_d)
-           line to (-wire_length ,  di_s_d)
-           line to close 
-    
-    region 9
-            mu = muu_wire
-        J = current_density
-       START 'ring' ( wire_rad +pen_len , cop_c_d )
-           line to ( wire_rad + pen_len, 0)
-           line to (-wire_length , 0)
-           line to (-wire_length ,  cop_c_d)
-           line to close 
-           
-    region 10
-        J  = 0
+    region 5 'Cortical Bone'
     	mu = muu_cb
-        start 'Fat'( (a2-a1)/2  +sth + fth +mth ,ar + nudge)
-        line to ((a2-a1)/2 + sth + fth +mth , nudge) to ((a2-a1)/2+ sth +fth +mth+ dcb, nudge) to ((a2-a1)/2 + sth +fth+mth +dcb,ar+ nudge) to close
-    
-    region 11
-        J  = 0
+        start (sth + fth + mth, ar)
+        line to (sth + fth + mth + dcb,  ar) to (sth + fth + mth + dcb,  0) to (sth + fth + mth, 0) to close
+        
+    region 6 'Cancellous Bone'
     	mu = muu_canb
-        start 'Fat'( (a2-a1)/2  +sth + fth +mth + dcb ,ar + nudge)
-        line to ((a2-a1)/2 + sth + fth +mth +dcb , nudge) to ((a2-a1)/2+ sth +fth +mth+ dcb+ dcanb, nudge) to ((a2-a1)/2 + sth +fth+mth +dcb + dcanb,ar+ nudge) to close
-    {
-    region 10
-            mu = muu_wire
-        J = current_density
-       START 'ring' ( wire_rad +pen_len , wire_rad )
-           line to ( wire_rad + pen_len, 0)
+        start (sth + fth + mth +dcb, ar)
+        line to (sth + fth + mth + dcb + dcanb,  ar) to (sth + fth + mth + dcb + dcanb,  0) to (sth + fth + mth + dcb, 0) to close
+        
+    region 7 'Hole'
+        mu = mu0
+       START 'ring' (pen_len , hole)
+           line to (pen_len, 0)
            line to (-wire_length , 0)
+           line to (-wire_length ,  hole)
+           line to close 
+           
+    region 8 'Terminal'
+        mu = muu_in
+        J = current_density
+       START 'ring' (pen_len , hole + cop_in)
+           line to (pen_len, hole)
+           line to (-wire_length , hole)
+           line to (-wire_length ,  hole + cop_in)
+           line to close 
+        
+    region 9 'Dielectric'
+        mu = muu_di
+       START 'ring' (pen_len , wire_rad )
+           line to (pen_len, cop_in)
+           line to (-wire_length , cop_in)
            line to (-wire_length ,  wire_rad)
            line to close 
-    }
+           
+    region 10 'Ground'
+        mu = muu_out
+        J = -current_density
+       START 'ring' (pen_len, wire_rad)
+           line to (pen_len, wire_rad - cop_out)
+           line to (0 , wire_rad - cop_out)
+           line to (0 ,  wire_rad)
+           line to close 
+           
 monitors
     contour(Bz) zoom(-2,0,4,4) as 'FLUX DENSITY B'
     contour(Aphi) as 'Potential'
@@ -245,7 +208,7 @@ plots
     
     surface(Aphi)  as 'MAGNETIC POTENTIAL'  viewpoint (-1,1,30)
     
-Summary
+{Summary
     !report (GlobalMax(Bmag, 1)) as 'Maximum flux density  (Wb/m^2)'
     !report (GlobalMax(Bmag, 2)) as 'Maximum flux density in the wire (Wb/m^2)'
     report (GlobalMax(Bmag, 3)) as 'Maximum flux density in the skin (Wb/m^2)'
@@ -257,4 +220,4 @@ Summary
     report (GlobalMax(Hmag, 3)) as 'Maximum Magnetic Field intensity in the skin (A/m)'
     report (GlobalMax(Hmag, 4)) as 'Maximum Magnetic Field intensity in the fat (A/m)'
     report (GlobalMax(Hmag, 5)) as 'Maximum Magnetic Field intensity in the muscle (A/m)'
-end "CIEPcbP1p8UrD0Ykk9rG4yeq+J6b384kTZRnemmylDzh4NSeLTdnTMCRkOBMoS23tpclJAzvcbEpb3QAb6K7Qovjmwqs32XquSq7Zn/zuZvD0C8taSgsHPSQzqwzfwJ8wpGqtCfyHAV+cyJ02PPcvZ8Sc5HVbAp95qxUD3S3CqH"
+}end "CIEPcbP1p8UrD0Ykk9rG4yeq+J6b384kTZRnemmylDzh4NSeLTdnTMCRkOBMoS23tpclJAzvcbEpb3QAb6K7Qovjmwqs32XquSq7Zn/zuZvD0C8taSgsHPSQzqwzfwJ8wpGqtCfyHAV+cyJ02PPcvZ8Sc5HVbAp95qxUD3S3CqH"

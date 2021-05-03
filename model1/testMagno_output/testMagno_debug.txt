@@ -1,0 +1,2498 @@
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\user\Documents\uwi\3022\coursework3\3022_CW3_simulation\model1\testMagno.pde 11:46:48 5/3/21
+================================================================
+    1| TITLE 'Heat flow around an Insulating Canister'
+    2| COORDINATES
+    3| Cartesian3
+    4| 
+    5| variables
+    6|     Ax        { the azimuthal component of the  vector potential }
+    7|     Ay
+    8|     Az
+    9|  
+   10| definitions
+   11|    Lx =0.05
+   12|    Ly = 0.05
+   13|     mu0 = pi *4e-7            { the permeability }
+   14|     mu 
+   15|     J0 = 0
+   16|     Jx = 0  Jy = 0  Jz = J0
+   17|     J = vector(Jx, Jy, Jz)
+   18|     rmu = 1/ mu
+   19|     nudge = 0.0001
+   20|     wire_length = 0.02
+   21|     pen_len = 1.5/100
+   22|     
+   23|     sth =0.0015                                                                                                   ! Thickness of the skin
+   24|     ar = 0.05                                                                                                        ! radius of the arm
+   25|     fth = 0.0085                                                                                                   ! Thickness of the Fat 
+   26|     mth=0.0275                                                                                                   ! Thickness of muscle 
+   27|     dcb =0.6/100
+   28|     dcanb = ar - sth - mth - fth - dcb 
+   29|     ! Radius  of the wire
+   30|     eps
+   31|     eps0=8.854e-12 							    ! The dielectric permittivity of free space.
+   32|     
+   33|     muu_skin = pi *4e-7 
+   34|     eps_skin = eps0
+   35|     muu_muscle=pi *4e-7 
+   36|     eps_muscle = eps0
+   37|     muu_fat = pi *4e-7 
+   38|     eps_fat = eps0
+   39|     muu_cb =  pi *4e-7 
+   40|     eps_cb = eps0
+   41|     muu_canb =  pi *4e-7
+   42|     eps_canb = eps0
+   43|     muu_in = pi *4e-7
+   44|     eps_in = 1
+   45|     muu_out = pi *4e-7 
+   46|     eps_out = 1
+   47|     muu_di = pi *4e-7 
+   48|     eps_di = eps0
+   49|     scale = 1
+   50| 
+   51|      wire_rad = (8.44e-3) * scale
+   52|      cop_out = (6.3e-3 - 4.7e-3)* scale                                                               !thickness of outside component
+   53|      di_s_d = (4.7e-3 - 0.7e-3) * scale                                                                 !thickness of dielectric
+   54|      cop_in = (1.8e-3) * scale
+   55|      hole = wire_rad - cop_in - di_s_d -cop_out
+   56|   
+   57|     current = 2.14
+   58|     B = curl(Ax, Ay, Az)                                                                                         { magnetic flux density }
+   59|     Bmag = magnitude(B)                                                                        ! The Magnitude of the flux density
+   60|     H = B/mu                                                                                      ! The magnetic field strength
+   61|     Hmag = magnitude(H)
+   62|     
+   63|     curlx = (dy(Az) - dz(Ay))/mu
+   64|     curly = (dz(Ax) - dx(Az))/mu
+   65|     curlz = (dx(Az) - dy(Ax))/mu
+   66| 
+   67|     
+   68| !initial values
+   69|     !Aphi = 2            { unimportant unless mu varies with H }
+   70|  
+   71| equations
+   72| 
+   73|     Ax: dx( dx(Ax)/mu)+ dy( dy(Ax)/mu)+ dz( dz(Ax)/mu)=-Jx
+   74|     Ay: dx( dx(Ay)/mu)+ dy( dy(Ay)/mu)+ dz( dz(Ay)/mu)=-Jy
+   75|     Az: dx( dx(Az)/mu)+ dy( dy(Az)/mu)+ dz( dz(Az)/mu)=-Jz
+   76|     { FlexPDE expands CURL in proper coordinates }
+   77|     {Ax: dy(curlz) - dz(curly) = Jx
+   78|     Ay: dz(curlx) - dx(curlz) = Jy
+   79|     Az: dx(curlz) - dy(curlx) = Jz}
+   80|     !Aphi: curl(rmu*curl(Aphi)) = J
+   81|     
+   82| EXTRUSION
+   83| SURFACE 'Bottom' z=0
+   84|       LAYER 'Cancellous Bone'
+   85| SURFACE 'Can top' z=dcanb
+   86|       LAYER 'Cortical Bone'
+   87| SURFACE 'Cor Top' z=dcb + dcanb
+   88|       LAYER 'Muscle'
+   89| SURFACE 'Cablebot' z=sth + fth + mth + dcb - dcanb-pen_len
+   90| SURFACE 'Mus Top' z=mth + dcb + dcanb
+   91|       LAYER 'Fat'
+   92| SURFACE 'Fat top' z=fth + mth + dcb + dcanb
+   93|       LAYER 'Skin'
+   94| SURFACE 'skin Top' z=sth + fth + mth + dcb + dcanb
+   95| SURFACE 'Top' z=0.08
+   96| 
+   97| BOUNDARIES
+   98| REGION 1 'box' 
+   99|       eps = eps0
+  100|       mu = mu0
+  101|       START(-Lx,-Ly)
+  102|       value(Ax) = 0  value(Ay) = 0  value(Az) = 0
+  103|       LINE TO (Lx,-Ly) TO (Lx,Ly) TO (-Lx,Ly) TO CLOSE
+  104|         
+  105| LIMITED REGION 2 'tissue' { the embedded blob }
+  106|      LAYER 1 
+  107|      mu = muu_canb
+  108|      eps = eps_canb*eps0
+  109|         
+  110|      LAYER 2 
+  111|      mu = muu_canb
+  112|      eps = eps_cb*eps0
+  113|         
+  114|      LAYER 3 
+  115|      mu = muu_muscle
+  116|      eps = eps_muscle*eps0
+  117|     
+  118|      LAYER 4 
+  119|      mu = muu_muscle
+  120|      eps = eps_muscle*eps0
+  121|         
+  122|      LAYER 5 
+  123|      mu = muu_fat
+  124|      eps = eps_fat*eps0
+  125|         
+  126|      LAYER 6 
+  127|      mu = muu_skin
+  128|      eps = eps_skin*eps0
+  129|      
+  130| LIMITED REGION 3 'Terminal' { the embedded blob }
+  131|      LAYER 4 
+  132|      mu = muu_in
+  133|      eps = eps_in*eps0
+  134|      J0 = current/(pi*((hole + cop_in)^2 - hole^2))
+  135|         
+  136|      LAYER 5 
+  137|      mu = muu_in
+  138|      eps = eps_in*eps0
+  139|      J0 = current/(pi*((hole + cop_in)^2 - hole^2))
+  140|         
+  141|      LAYER 6 
+  142|      mu = muu_in
+  143|      eps = eps_in*eps0
+  144|      J0 = current/(pi*((hole + cop_in)^2 - hole^2))
+  145|      
+  146|      LAYER 7
+  147|      mu = muu_in
+  148|      eps = eps_in*eps0
+  149|      J0 = current/(pi*((hole + cop_in)^2 - hole^2))
+  150|      
+  151|      START(cop_in+hole, 0)
+  152|      arc(center = 0, 0) angle 360 to close
+  153|      
+  154|      start(hole, 0)
+  155|      arc(center = 0, 0) angle 360 to close
+  156|      
+  157| LIMITED REGION 4 'Dielectric_Tissue' { the embedded blob }
+  158|      LAYER 4 
+  159|      mu = muu_di
+  160|      eps = eps_di*eps0
+  161|         
+  162|      LAYER 5 
+  163|      mu = muu_di
+  164|      eps = eps_di*eps0
+  165|         
+  166|      LAYER 6 
+  167|      mu = muu_di
+  168|      eps = eps_di*eps0
+  169|      
+  170|      START(di_s_d+cop_in+hole, 0)
+  171|      arc(center = 0, 0) angle 360 to close
+  172|      
+  173|      start(cop_in+hole, 0)
+  174|      arc(center = 0, 0) angle 360 to close
+  175|      
+  176| LIMITED REGION 5 'Dielectric' { the embedded blob }
+  177|      LAYER 7
+  178|      mu = muu_di
+  179|      eps = eps_di*eps0
+  180|      
+  181|      START(wire_rad, 0)
+  182|      arc(center = 0, 0) angle 360 to close
+  183|      
+  184|      start(cop_in+hole, 0)
+  185|      arc(center = 0, 0) angle 360 to close
+  186|      
+  187| LIMITED REGION 6 'Ground' { the embedded blob }
+  188|      LAYER 4 
+  189|      J0 = -current/(pi*((hole + cop_in + cop_out)^2 - (hole + cop_in)^2))
+  190|      mu = muu_out
+  191|      eps = eps_out*eps0
+  192|         
+  193|      LAYER 5 
+  194|      J0 = -current/(pi*((hole + cop_in + cop_out)^2 - (hole + cop_in)^2))
+  195|      mu = muu_out
+  196|      eps = eps_out*eps0
+  197|         
+  198|      LAYER 6 
+  199|      J0 = -current/(pi*((hole + cop_in + cop_out)^2 - (hole + cop_in)^2))
+  200|      mu = muu_out
+  201|      eps = eps_out*eps0
+  202|      
+  203|      START(cop_out + di_s_d+cop_in+hole, 0)
+  204|      arc(center = 0, 0) angle 360 to close
+  205|      
+  206|      start(di_s_d + cop_in+hole, 0)
+  207|      arc(center = 0, 0) angle 360 to close
+  208|      
+  209| PLOTS
+  210| GRID(y,z) ON x=0
+  211|  !CONTOUR(Ax^2 + Ay^2) ON z=0
+  212|      VECTOR(J) ON x=0
+  213|      vector(B) ON z = sth + fth + mth + dcb - dcanb-pen_len
+  214|      !ELEVATION(v) FROM (0,-1,0) to (0,1,0) { note 3D coordinates }
+  215| END
+LOG Threads=1 Order=3 Speed=1 Stability=0
+Uorder=3
+ AX order=3
+ AY order=3
+ AZ order=3
+IMPORTMESH(0) NDIM=3 NB=20 NAB=4 NODES=12030 CELLS=67390 SIDES=135690 LEGS=80329 imaging=0 time(0)=0
+Import Mesh Time=627 ms
+
+3D MESH GENERATION TIME 1369 MS
+
+SUMMARIZE 51 PARAMETERS (NO COMMON SUBEXPRESSION ELIMINATION)
+   Param         Compartment       Complexity     Memory
+--------------------------------------------------------------
+             LX      0                    1         80
+             LY      0                    1         80
+            MU0      0                    1         80
+             MU      1                    1         80
+             MU      2                    1         80
+             MU      3                    1         80
+             MU      4                    1         80
+             MU      5                    1         80
+             MU      6                    1         80
+             MU      7                    1         80
+             MU      8                    1         80
+             MU      9                    1         80
+             MU     10                    1         80
+             MU     11                    1         80
+             MU     12                    1         80
+             MU     13                    1         80
+             MU     14                    1         80
+             MU     15                    1         80
+             MU     16                    1         80
+             MU     17                    1         80
+             MU     18                    1         80
+             MU     19                    1         80
+             MU     20                    1         80
+             MU     21                    1         80
+             MU     22                    1         80
+             MU     23                    1         80
+             MU     24                    1         80
+             J0      1                    1         80
+             J0      2                    1         80
+             J0      3                    1         80
+             J0      4                    1         80
+             J0      5                    1         80
+             J0      6                    1         80
+             J0      7                    1         80
+             J0      8                    1         80
+             J0      9                    1         80
+             J0     10                    1         80
+             J0     11                    1         80
+             J0     12                    1         80
+             J0     13                    1         80
+             J0     14                    1         80
+             J0     15                    1         80
+             J0     16                    1         80
+             J0     17                    1         80
+             J0     18                    1         80
+             J0     19                    1         80
+             J0     20                    1         80
+             J0     21                    1         80
+             J0     22                    1         80
+             J0     23                    1         80
+             J0     24                    1         80
+             JX      0                    1         80
+             JY      0                    1         80
+             JZ      1                    1         80
+             JZ      2                    1         80
+             JZ      3                    1         80
+             JZ      4                    1         80
+             JZ      5                    1         80
+             JZ      6                    1         80
+             JZ      7                    1         80
+             JZ      8                    1         80
+             JZ      9                    1         80
+             JZ     10                    1         80
+             JZ     11                    1         80
+             JZ     12                    1         80
+             JZ     13                    1         80
+             JZ     14                    1         80
+             JZ     15                    1         80
+             JZ     16                    1         80
+             JZ     17                    1         80
+             JZ     18                    1         80
+             JZ     19                    1         80
+             JZ     20                    1         80
+             JZ     21                    1         80
+             JZ     22                    1         80
+             JZ     23                    1         80
+             JZ     24                    1         80
+              J      1                    1         80
+              J      2                    1         80
+              J      3                    1         80
+              J      4                    1         80
+              J      5                    1         80
+              J      6                    1         80
+              J      7                    1         80
+              J      8                    1         80
+              J      9                    4        320
+              J     10                    1         80
+              J     11                    4        320
+              J     12                    1         80
+              J     13                    1         80
+              J     14                    4        320
+              J     15                    1         80
+              J     16                    4        320
+              J     17                    1         80
+              J     18                    1         80
+              J     19                    4        320
+              J     20                    1         80
+              J     21                    4        320
+              J     22                    1         80
+              J     23                    4        320
+              J     24                    1         80
+            RMU      1                    1         80
+            RMU      2                    1         80
+            RMU      3                    1         80
+            RMU      4                    1         80
+            RMU      5                    1         80
+            RMU      6                    1         80
+            RMU      7                    1         80
+            RMU      8                    1         80
+            RMU      9                    1         80
+            RMU     10                    1         80
+            RMU     11                    1         80
+            RMU     12                    1         80
+            RMU     13                    1         80
+            RMU     14                    1         80
+            RMU     15                    1         80
+            RMU     16                    1         80
+            RMU     17                    1         80
+            RMU     18                    1         80
+            RMU     19                    1         80
+            RMU     20                    1         80
+            RMU     21                    1         80
+            RMU     22                    1         80
+            RMU     23                    1         80
+            RMU     24                    1         80
+          NUDGE      0                    1         80
+    WIRE_LENGTH      0                    1         80
+        PEN_LEN      0                    1         80
+            STH      0                    1         80
+             AR      0                    1         80
+            FTH      0                    1         80
+            MTH      0                    1         80
+            DCB      0                    1         80
+          DCANB      0                    1         80
+            EPS      1                    1         80
+            EPS      2                    1         80
+            EPS      3                    1         80
+            EPS      4                    1         80
+            EPS      5                    1         80
+            EPS      6                    1         80
+            EPS      7                    1         80
+            EPS      8                    1         80
+            EPS      9                    1         80
+            EPS     10                    1         80
+            EPS     11                    1         80
+            EPS     12                    1         80
+            EPS     13                    1         80
+            EPS     14                    1         80
+            EPS     15                    1         80
+            EPS     16                    1         80
+            EPS     17                    1         80
+            EPS     18                    1         80
+            EPS     19                    1         80
+            EPS     20                    1         80
+            EPS     21                    1         80
+            EPS     22                    1         80
+            EPS     23                    1         80
+            EPS     24                    1         80
+           EPS0      0                    1         80
+       MUU_SKIN      0                    1         80
+       EPS_SKIN      0                    1         80
+     MUU_MUSCLE      0                    1         80
+     EPS_MUSCLE      0                    1         80
+        MUU_FAT      0                    1         80
+        EPS_FAT      0                    1         80
+         MUU_CB      0                    1         80
+         EPS_CB      0                    1         80
+       MUU_CANB      0                    1         80
+       EPS_CANB      0                    1         80
+         MUU_IN      0                    1         80
+         EPS_IN      0                    1         80
+        MUU_OUT      0                    1         80
+        EPS_OUT      0                    1         80
+         MUU_DI      0                    1         80
+         EPS_DI      0                    1         80
+          SCALE      0                    1         80
+       WIRE_RAD      0                    1         80
+        COP_OUT      0                    1         80
+         DI_S_D      0                    1         80
+         COP_IN      0                    1         80
+           HOLE      0                    1         80
+        CURRENT      0                    1         80
+              B      0                   10        800
+           BMAG      0                   15       1200
+              H      1                   16       1280
+              H      2                   16       1280
+              H      3                   16       1280
+              H      4                   16       1280
+              H      5                   16       1280
+              H      6                   16       1280
+              H      7                   16       1280
+              H      8                   16       1280
+              H      9                   16       1280
+              H     10                   16       1280
+              H     11                   16       1280
+              H     12                   16       1280
+              H     13                   16       1280
+              H     14                   16       1280
+              H     15                   16       1280
+              H     16                   16       1280
+              H     17                   16       1280
+              H     18                   16       1280
+              H     19                   16       1280
+              H     20                   16       1280
+              H     21                   16       1280
+              H     22                   16       1280
+              H     23                   16       1280
+              H     24                   16       1280
+           HMAG      1                   21       1680
+           HMAG      2                   21       1680
+           HMAG      3                   21       1680
+           HMAG      4                   21       1680
+           HMAG      5                   21       1680
+           HMAG      6                   21       1680
+           HMAG      7                   21       1680
+           HMAG      8                   21       1680
+           HMAG      9                   21       1680
+           HMAG     10                   21       1680
+           HMAG     11                   21       1680
+           HMAG     12                   21       1680
+           HMAG     13                   21       1680
+           HMAG     14                   21       1680
+           HMAG     15                   21       1680
+           HMAG     16                   21       1680
+           HMAG     17                   21       1680
+           HMAG     18                   21       1680
+           HMAG     19                   21       1680
+           HMAG     20                   21       1680
+           HMAG     21                   21       1680
+           HMAG     22                   21       1680
+           HMAG     23                   21       1680
+           HMAG     24                   21       1680
+          CURLX      1                    5        400
+          CURLX      2                    5        400
+          CURLX      3                    5        400
+          CURLX      4                    5        400
+          CURLX      5                    5        400
+          CURLX      6                    5        400
+          CURLX      7                    5        400
+          CURLX      8                    5        400
+          CURLX      9                    5        400
+          CURLX     10                    5        400
+          CURLX     11                    5        400
+          CURLX     12                    5        400
+          CURLX     13                    5        400
+          CURLX     14                    5        400
+          CURLX     15                    5        400
+          CURLX     16                    5        400
+          CURLX     17                    5        400
+          CURLX     18                    5        400
+          CURLX     19                    5        400
+          CURLX     20                    5        400
+          CURLX     21                    5        400
+          CURLX     22                    5        400
+          CURLX     23                    5        400
+          CURLX     24                    5        400
+          CURLY      1                    5        400
+          CURLY      2                    5        400
+          CURLY      3                    5        400
+          CURLY      4                    5        400
+          CURLY      5                    5        400
+          CURLY      6                    5        400
+          CURLY      7                    5        400
+          CURLY      8                    5        400
+          CURLY      9                    5        400
+          CURLY     10                    5        400
+          CURLY     11                    5        400
+          CURLY     12                    5        400
+          CURLY     13                    5        400
+          CURLY     14                    5        400
+          CURLY     15                    5        400
+          CURLY     16                    5        400
+          CURLY     17                    5        400
+          CURLY     18                    5        400
+          CURLY     19                    5        400
+          CURLY     20                    5        400
+          CURLY     21                    5        400
+          CURLY     22                    5        400
+          CURLY     23                    5        400
+          CURLY     24                    5        400
+          CURLZ      1                    5        400
+          CURLZ      2                    5        400
+          CURLZ      3                    5        400
+          CURLZ      4                    5        400
+          CURLZ      5                    5        400
+          CURLZ      6                    5        400
+          CURLZ      7                    5        400
+          CURLZ      8                    5        400
+          CURLZ      9                    5        400
+          CURLZ     10                    5        400
+          CURLZ     11                    5        400
+          CURLZ     12                    5        400
+          CURLZ     13                    5        400
+          CURLZ     14                    5        400
+          CURLZ     15                    5        400
+          CURLZ     16                    5        400
+          CURLZ     17                    5        400
+          CURLZ     18                    5        400
+          CURLZ     19                    5        400
+          CURLZ     20                    5        400
+          CURLZ     21                    5        400
+          CURLZ     22                    5        400
+          CURLZ     23                    5        400
+          CURLZ     24                    5        400
+
+--------------------------
+SUMMARIZE EQUATIONS
+--------------------------
+           DEFINES               DEPENDS                    BASE         CSE
+ EQUATION    VAR    COMPARTMENT    VAR       FUNCTION     COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------------------------------
+     1         AX          1                       Source          1            2          160
+     1         AX          1                     Galerkin         15           15         1200
+     1         AX          1           AX        Jacobian         15           15         1200
+     1         AX          1                Surf Galerkin         14           14         1120
+     1         AX          1           AX   Surf Jacobian         14           14         1120
+     1         AX          2                       Source          1            2          160
+     1         AX          2                     Galerkin         15           15         1200
+     1         AX          2           AX        Jacobian         15           15         1200
+     1         AX          2                Surf Galerkin         14           14         1120
+     1         AX          2           AX   Surf Jacobian         14           14         1120
+     1         AX          3                       Source          1            2          160
+     1         AX          3                     Galerkin         15           15         1200
+     1         AX          3           AX        Jacobian         15           15         1200
+     1         AX          3                Surf Galerkin         14           14         1120
+     1         AX          3           AX   Surf Jacobian         14           14         1120
+     1         AX          4                       Source          1            2          160
+     1         AX          4                     Galerkin         15           15         1200
+     1         AX          4           AX        Jacobian         15           15         1200
+     1         AX          4                Surf Galerkin         14           14         1120
+     1         AX          4           AX   Surf Jacobian         14           14         1120
+     1         AX          5                       Source          1            2          160
+     1         AX          5                     Galerkin         15           15         1200
+     1         AX          5           AX        Jacobian         15           15         1200
+     1         AX          5                Surf Galerkin         14           14         1120
+     1         AX          5           AX   Surf Jacobian         14           14         1120
+     1         AX          6                       Source          1            2          160
+     1         AX          6                     Galerkin         15           15         1200
+     1         AX          6           AX        Jacobian         15           15         1200
+     1         AX          6                Surf Galerkin         14           14         1120
+     1         AX          6           AX   Surf Jacobian         14           14         1120
+     1         AX          7                       Source          1            2          160
+     1         AX          7                     Galerkin         15           15         1200
+     1         AX          7           AX        Jacobian         15           15         1200
+     1         AX          7                Surf Galerkin         14           14         1120
+     1         AX          7           AX   Surf Jacobian         14           14         1120
+     1         AX          8                       Source          1            2          160
+     1         AX          8                     Galerkin         15           15         1200
+     1         AX          8           AX        Jacobian         15           15         1200
+     1         AX          8                Surf Galerkin         14           14         1120
+     1         AX          8           AX   Surf Jacobian         14           14         1120
+     1         AX          9                       Source          1            2          160
+     1         AX          9                     Galerkin         15           15         1200
+     1         AX          9           AX        Jacobian         15           15         1200
+     1         AX          9                Surf Galerkin         14           14         1120
+     1         AX          9           AX   Surf Jacobian         14           14         1120
+     1         AX         10                       Source          1            2          160
+     1         AX         10                     Galerkin         15           15         1200
+     1         AX         10           AX        Jacobian         15           15         1200
+     1         AX         10                Surf Galerkin         14           14         1120
+     1         AX         10           AX   Surf Jacobian         14           14         1120
+     1         AX         11                       Source          1            2          160
+     1         AX         11                     Galerkin         15           15         1200
+     1         AX         11           AX        Jacobian         15           15         1200
+     1         AX         11                Surf Galerkin         14           14         1120
+     1         AX         11           AX   Surf Jacobian         14           14         1120
+     1         AX         12                       Source          1            2          160
+     1         AX         12                     Galerkin         15           15         1200
+     1         AX         12           AX        Jacobian         15           15         1200
+     1         AX         12                Surf Galerkin         14           14         1120
+     1         AX         12           AX   Surf Jacobian         14           14         1120
+     1         AX         13                       Source          1            2          160
+     1         AX         13                     Galerkin         15           15         1200
+     1         AX         13           AX        Jacobian         15           15         1200
+     1         AX         13                Surf Galerkin         14           14         1120
+     1         AX         13           AX   Surf Jacobian         14           14         1120
+     1         AX         14                       Source          1            2          160
+     1         AX         14                     Galerkin         15           15         1200
+     1         AX         14           AX        Jacobian         15           15         1200
+     1         AX         14                Surf Galerkin         14           14         1120
+     1         AX         14           AX   Surf Jacobian         14           14         1120
+     1         AX         15                       Source          1            2          160
+     1         AX         15                     Galerkin         15           15         1200
+     1         AX         15           AX        Jacobian         15           15         1200
+     1         AX         15                Surf Galerkin         14           14         1120
+     1         AX         15           AX   Surf Jacobian         14           14         1120
+     1         AX         16                       Source          1            2          160
+     1         AX         16                     Galerkin         15           15         1200
+     1         AX         16           AX        Jacobian         15           15         1200
+     1         AX         16                Surf Galerkin         14           14         1120
+     1         AX         16           AX   Surf Jacobian         14           14         1120
+     1         AX         17                       Source          1            2          160
+     1         AX         17                     Galerkin         15           15         1200
+     1         AX         17           AX        Jacobian         15           15         1200
+     1         AX         17                Surf Galerkin         14           14         1120
+     1         AX         17           AX   Surf Jacobian         14           14         1120
+     1         AX         18                       Source          1            2          160
+     1         AX         18                     Galerkin         15           15         1200
+     1         AX         18           AX        Jacobian         15           15         1200
+     1         AX         18                Surf Galerkin         14           14         1120
+     1         AX         18           AX   Surf Jacobian         14           14         1120
+     1         AX         19                       Source          1            2          160
+     1         AX         19                     Galerkin         15           15         1200
+     1         AX         19           AX        Jacobian         15           15         1200
+     1         AX         19                Surf Galerkin         14           14         1120
+     1         AX         19           AX   Surf Jacobian         14           14         1120
+     1         AX         20                       Source          1            2          160
+     1         AX         20                     Galerkin         15           15         1200
+     1         AX         20           AX        Jacobian         15           15         1200
+     1         AX         20                Surf Galerkin         14           14         1120
+     1         AX         20           AX   Surf Jacobian         14           14         1120
+     1         AX         21                       Source          1            2          160
+     1         AX         21                     Galerkin         15           15         1200
+     1         AX         21           AX        Jacobian         15           15         1200
+     1         AX         21                Surf Galerkin         14           14         1120
+     1         AX         21           AX   Surf Jacobian         14           14         1120
+     1         AX         22                       Source          1            2          160
+     1         AX         22                     Galerkin         15           15         1200
+     1         AX         22           AX        Jacobian         15           15         1200
+     1         AX         22                Surf Galerkin         14           14         1120
+     1         AX         22           AX   Surf Jacobian         14           14         1120
+     1         AX         23                       Source          1            2          160
+     1         AX         23                     Galerkin         15           15         1200
+     1         AX         23           AX        Jacobian         15           15         1200
+     1         AX         23                Surf Galerkin         14           14         1120
+     1         AX         23           AX   Surf Jacobian         14           14         1120
+     1         AX         24                       Source          1            2          160
+     1         AX         24                     Galerkin         15           15         1200
+     1         AX         24           AX        Jacobian         15           15         1200
+     1         AX         24                Surf Galerkin         14           14         1120
+     1         AX         24           AX   Surf Jacobian         14           14         1120
+     2         AY          1                       Source          1            2          160
+     2         AY          1                     Galerkin         15           15         1200
+     2         AY          1           AY        Jacobian         15           15         1200
+     2         AY          1                Surf Galerkin         14           14         1120
+     2         AY          1           AY   Surf Jacobian         14           14         1120
+     2         AY          2                       Source          1            2          160
+     2         AY          2                     Galerkin         15           15         1200
+     2         AY          2           AY        Jacobian         15           15         1200
+     2         AY          2                Surf Galerkin         14           14         1120
+     2         AY          2           AY   Surf Jacobian         14           14         1120
+     2         AY          3                       Source          1            2          160
+     2         AY          3                     Galerkin         15           15         1200
+     2         AY          3           AY        Jacobian         15           15         1200
+     2         AY          3                Surf Galerkin         14           14         1120
+     2         AY          3           AY   Surf Jacobian         14           14         1120
+     2         AY          4                       Source          1            2          160
+     2         AY          4                     Galerkin         15           15         1200
+     2         AY          4           AY        Jacobian         15           15         1200
+     2         AY          4                Surf Galerkin         14           14         1120
+     2         AY          4           AY   Surf Jacobian         14           14         1120
+     2         AY          5                       Source          1            2          160
+     2         AY          5                     Galerkin         15           15         1200
+     2         AY          5           AY        Jacobian         15           15         1200
+     2         AY          5                Surf Galerkin         14           14         1120
+     2         AY          5           AY   Surf Jacobian         14           14         1120
+     2         AY          6                       Source          1            2          160
+     2         AY          6                     Galerkin         15           15         1200
+     2         AY          6           AY        Jacobian         15           15         1200
+     2         AY          6                Surf Galerkin         14           14         1120
+     2         AY          6           AY   Surf Jacobian         14           14         1120
+     2         AY          7                       Source          1            2          160
+     2         AY          7                     Galerkin         15           15         1200
+     2         AY          7           AY        Jacobian         15           15         1200
+     2         AY          7                Surf Galerkin         14           14         1120
+     2         AY          7           AY   Surf Jacobian         14           14         1120
+     2         AY          8                       Source          1            2          160
+     2         AY          8                     Galerkin         15           15         1200
+     2         AY          8           AY        Jacobian         15           15         1200
+     2         AY          8                Surf Galerkin         14           14         1120
+     2         AY          8           AY   Surf Jacobian         14           14         1120
+     2         AY          9                       Source          1            2          160
+     2         AY          9                     Galerkin         15           15         1200
+     2         AY          9           AY        Jacobian         15           15         1200
+     2         AY          9                Surf Galerkin         14           14         1120
+     2         AY          9           AY   Surf Jacobian         14           14         1120
+     2         AY         10                       Source          1            2          160
+     2         AY         10                     Galerkin         15           15         1200
+     2         AY         10           AY        Jacobian         15           15         1200
+     2         AY         10                Surf Galerkin         14           14         1120
+     2         AY         10           AY   Surf Jacobian         14           14         1120
+     2         AY         11                       Source          1            2          160
+     2         AY         11                     Galerkin         15           15         1200
+     2         AY         11           AY        Jacobian         15           15         1200
+     2         AY         11                Surf Galerkin         14           14         1120
+     2         AY         11           AY   Surf Jacobian         14           14         1120
+     2         AY         12                       Source          1            2          160
+     2         AY         12                     Galerkin         15           15         1200
+     2         AY         12           AY        Jacobian         15           15         1200
+     2         AY         12                Surf Galerkin         14           14         1120
+     2         AY         12           AY   Surf Jacobian         14           14         1120
+     2         AY         13                       Source          1            2          160
+     2         AY         13                     Galerkin         15           15         1200
+     2         AY         13           AY        Jacobian         15           15         1200
+     2         AY         13                Surf Galerkin         14           14         1120
+     2         AY         13           AY   Surf Jacobian         14           14         1120
+     2         AY         14                       Source          1            2          160
+     2         AY         14                     Galerkin         15           15         1200
+     2         AY         14           AY        Jacobian         15           15         1200
+     2         AY         14                Surf Galerkin         14           14         1120
+     2         AY         14           AY   Surf Jacobian         14           14         1120
+     2         AY         15                       Source          1            2          160
+     2         AY         15                     Galerkin         15           15         1200
+     2         AY         15           AY        Jacobian         15           15         1200
+     2         AY         15                Surf Galerkin         14           14         1120
+     2         AY         15           AY   Surf Jacobian         14           14         1120
+     2         AY         16                       Source          1            2          160
+     2         AY         16                     Galerkin         15           15         1200
+     2         AY         16           AY        Jacobian         15           15         1200
+     2         AY         16                Surf Galerkin         14           14         1120
+     2         AY         16           AY   Surf Jacobian         14           14         1120
+     2         AY         17                       Source          1            2          160
+     2         AY         17                     Galerkin         15           15         1200
+     2         AY         17           AY        Jacobian         15           15         1200
+     2         AY         17                Surf Galerkin         14           14         1120
+     2         AY         17           AY   Surf Jacobian         14           14         1120
+     2         AY         18                       Source          1            2          160
+     2         AY         18                     Galerkin         15           15         1200
+     2         AY         18           AY        Jacobian         15           15         1200
+     2         AY         18                Surf Galerkin         14           14         1120
+     2         AY         18           AY   Surf Jacobian         14           14         1120
+     2         AY         19                       Source          1            2          160
+     2         AY         19                     Galerkin         15           15         1200
+     2         AY         19           AY        Jacobian         15           15         1200
+     2         AY         19                Surf Galerkin         14           14         1120
+     2         AY         19           AY   Surf Jacobian         14           14         1120
+     2         AY         20                       Source          1            2          160
+     2         AY         20                     Galerkin         15           15         1200
+     2         AY         20           AY        Jacobian         15           15         1200
+     2         AY         20                Surf Galerkin         14           14         1120
+     2         AY         20           AY   Surf Jacobian         14           14         1120
+     2         AY         21                       Source          1            2          160
+     2         AY         21                     Galerkin         15           15         1200
+     2         AY         21           AY        Jacobian         15           15         1200
+     2         AY         21                Surf Galerkin         14           14         1120
+     2         AY         21           AY   Surf Jacobian         14           14         1120
+     2         AY         22                       Source          1            2          160
+     2         AY         22                     Galerkin         15           15         1200
+     2         AY         22           AY        Jacobian         15           15         1200
+     2         AY         22                Surf Galerkin         14           14         1120
+     2         AY         22           AY   Surf Jacobian         14           14         1120
+     2         AY         23                       Source          1            2          160
+     2         AY         23                     Galerkin         15           15         1200
+     2         AY         23           AY        Jacobian         15           15         1200
+     2         AY         23                Surf Galerkin         14           14         1120
+     2         AY         23           AY   Surf Jacobian         14           14         1120
+     2         AY         24                       Source          1            2          160
+     2         AY         24                     Galerkin         15           15         1200
+     2         AY         24           AY        Jacobian         15           15         1200
+     2         AY         24                Surf Galerkin         14           14         1120
+     2         AY         24           AY   Surf Jacobian         14           14         1120
+     3         AZ          1                       Source          1            2          160
+     3         AZ          1                     Galerkin         15           15         1200
+     3         AZ          1           AZ        Jacobian         15           15         1200
+     3         AZ          1                Surf Galerkin         14           14         1120
+     3         AZ          1           AZ   Surf Jacobian         14           14         1120
+     3         AZ          2                       Source          1            2          160
+     3         AZ          2                     Galerkin         15           15         1200
+     3         AZ          2           AZ        Jacobian         15           15         1200
+     3         AZ          2                Surf Galerkin         14           14         1120
+     3         AZ          2           AZ   Surf Jacobian         14           14         1120
+     3         AZ          3                       Source          1            2          160
+     3         AZ          3                     Galerkin         15           15         1200
+     3         AZ          3           AZ        Jacobian         15           15         1200
+     3         AZ          3                Surf Galerkin         14           14         1120
+     3         AZ          3           AZ   Surf Jacobian         14           14         1120
+     3         AZ          4                       Source          1            2          160
+     3         AZ          4                     Galerkin         15           15         1200
+     3         AZ          4           AZ        Jacobian         15           15         1200
+     3         AZ          4                Surf Galerkin         14           14         1120
+     3         AZ          4           AZ   Surf Jacobian         14           14         1120
+     3         AZ          5                       Source          1            2          160
+     3         AZ          5                     Galerkin         15           15         1200
+     3         AZ          5           AZ        Jacobian         15           15         1200
+     3         AZ          5                Surf Galerkin         14           14         1120
+     3         AZ          5           AZ   Surf Jacobian         14           14         1120
+     3         AZ          6                       Source          1            2          160
+     3         AZ          6                     Galerkin         15           15         1200
+     3         AZ          6           AZ        Jacobian         15           15         1200
+     3         AZ          6                Surf Galerkin         14           14         1120
+     3         AZ          6           AZ   Surf Jacobian         14           14         1120
+     3         AZ          7                       Source          1            2          160
+     3         AZ          7                     Galerkin         15           15         1200
+     3         AZ          7           AZ        Jacobian         15           15         1200
+     3         AZ          7                Surf Galerkin         14           14         1120
+     3         AZ          7           AZ   Surf Jacobian         14           14         1120
+     3         AZ          8                       Source          1            2          160
+     3         AZ          8                     Galerkin         15           15         1200
+     3         AZ          8           AZ        Jacobian         15           15         1200
+     3         AZ          8                Surf Galerkin         14           14         1120
+     3         AZ          8           AZ   Surf Jacobian         14           14         1120
+     3         AZ          9                       Source          1            2          160
+     3         AZ          9                     Galerkin         15           15         1200
+     3         AZ          9           AZ        Jacobian         15           15         1200
+     3         AZ          9                Surf Galerkin         14           14         1120
+     3         AZ          9           AZ   Surf Jacobian         14           14         1120
+     3         AZ         10                       Source          1            2          160
+     3         AZ         10                     Galerkin         15           15         1200
+     3         AZ         10           AZ        Jacobian         15           15         1200
+     3         AZ         10                Surf Galerkin         14           14         1120
+     3         AZ         10           AZ   Surf Jacobian         14           14         1120
+     3         AZ         11                       Source          1            2          160
+     3         AZ         11                     Galerkin         15           15         1200
+     3         AZ         11           AZ        Jacobian         15           15         1200
+     3         AZ         11                Surf Galerkin         14           14         1120
+     3         AZ         11           AZ   Surf Jacobian         14           14         1120
+     3         AZ         12                       Source          1            2          160
+     3         AZ         12                     Galerkin         15           15         1200
+     3         AZ         12           AZ        Jacobian         15           15         1200
+     3         AZ         12                Surf Galerkin         14           14         1120
+     3         AZ         12           AZ   Surf Jacobian         14           14         1120
+     3         AZ         13                       Source          1            2          160
+     3         AZ         13                     Galerkin         15           15         1200
+     3         AZ         13           AZ        Jacobian         15           15         1200
+     3         AZ         13                Surf Galerkin         14           14         1120
+     3         AZ         13           AZ   Surf Jacobian         14           14         1120
+     3         AZ         14                       Source          1            2          160
+     3         AZ         14                     Galerkin         15           15         1200
+     3         AZ         14           AZ        Jacobian         15           15         1200
+     3         AZ         14                Surf Galerkin         14           14         1120
+     3         AZ         14           AZ   Surf Jacobian         14           14         1120
+     3         AZ         15                       Source          1            2          160
+     3         AZ         15                     Galerkin         15           15         1200
+     3         AZ         15           AZ        Jacobian         15           15         1200
+     3         AZ         15                Surf Galerkin         14           14         1120
+     3         AZ         15           AZ   Surf Jacobian         14           14         1120
+     3         AZ         16                       Source          1            2          160
+     3         AZ         16                     Galerkin         15           15         1200
+     3         AZ         16           AZ        Jacobian         15           15         1200
+     3         AZ         16                Surf Galerkin         14           14         1120
+     3         AZ         16           AZ   Surf Jacobian         14           14         1120
+     3         AZ         17                       Source          1            2          160
+     3         AZ         17                     Galerkin         15           15         1200
+     3         AZ         17           AZ        Jacobian         15           15         1200
+     3         AZ         17                Surf Galerkin         14           14         1120
+     3         AZ         17           AZ   Surf Jacobian         14           14         1120
+     3         AZ         18                       Source          1            2          160
+     3         AZ         18                     Galerkin         15           15         1200
+     3         AZ         18           AZ        Jacobian         15           15         1200
+     3         AZ         18                Surf Galerkin         14           14         1120
+     3         AZ         18           AZ   Surf Jacobian         14           14         1120
+     3         AZ         19                       Source          1            2          160
+     3         AZ         19                     Galerkin         15           15         1200
+     3         AZ         19           AZ        Jacobian         15           15         1200
+     3         AZ         19                Surf Galerkin         14           14         1120
+     3         AZ         19           AZ   Surf Jacobian         14           14         1120
+     3         AZ         20                       Source          1            2          160
+     3         AZ         20                     Galerkin         15           15         1200
+     3         AZ         20           AZ        Jacobian         15           15         1200
+     3         AZ         20                Surf Galerkin         14           14         1120
+     3         AZ         20           AZ   Surf Jacobian         14           14         1120
+     3         AZ         21                       Source          1            2          160
+     3         AZ         21                     Galerkin         15           15         1200
+     3         AZ         21           AZ        Jacobian         15           15         1200
+     3         AZ         21                Surf Galerkin         14           14         1120
+     3         AZ         21           AZ   Surf Jacobian         14           14         1120
+     3         AZ         22                       Source          1            2          160
+     3         AZ         22                     Galerkin         15           15         1200
+     3         AZ         22           AZ        Jacobian         15           15         1200
+     3         AZ         22                Surf Galerkin         14           14         1120
+     3         AZ         22           AZ   Surf Jacobian         14           14         1120
+     3         AZ         23                       Source          1            2          160
+     3         AZ         23                     Galerkin         15           15         1200
+     3         AZ         23           AZ        Jacobian         15           15         1200
+     3         AZ         23                Surf Galerkin         14           14         1120
+     3         AZ         23           AZ   Surf Jacobian         14           14         1120
+     3         AZ         24                       Source          1            2          160
+     3         AZ         24                     Galerkin         15           15         1200
+     3         AZ         24           AZ        Jacobian         15           15         1200
+     3         AZ         24                Surf Galerkin         14           14         1120
+     3         AZ         24           AZ   Surf Jacobian         14           14         1120
+
+EQUATION 1 PARAMETER DEPENDENCIES:
+ MU0             MU              JX              MUU_SKIN        MUU_MUSCLE     
+ MUU_FAT         MUU_CANB        MUU_IN          MUU_OUT         MUU_DI         
+
+EQUATION 2 PARAMETER DEPENDENCIES:
+ MU0             MU              JY              MUU_SKIN        MUU_MUSCLE     
+ MUU_FAT         MUU_CANB        MUU_IN          MUU_OUT         MUU_DI         
+
+EQUATION 3 PARAMETER DEPENDENCIES:
+ MU0             MU              J0              JZ              MUU_SKIN       
+ MUU_MUSCLE      MUU_FAT         MUU_CANB        MUU_IN          MUU_OUT        
+ MUU_DI          SCALE           WIRE_RAD        COP_OUT         DI_S_D         
+ COP_IN          HOLE            CURRENT        
+
+BC 1  REGION 1 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 3 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 5 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 7 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 12 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 17 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 22 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 2  REGION 1 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 3 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 5 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 7 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 12 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 17 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 22 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 3  REGION 1 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 3 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 5 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 7 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 12 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 17 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 22 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BOUNDARY CONDITION TAGS with associated BC INDEX
+BC TAG   1: val(1) val(2) val(3)
+
+BOUNDARY CONDITION FORMULAS [BCINDEX]
+BC INDEX 1 VAL(AX)
+|  0.00000
+----------------------------------------
+
+        REGIONS
+    1 |       1      3      5      7     12     17     22
+BC INDEX 2 VAL(AY)
+|  0.00000
+----------------------------------------
+
+        REGIONS
+    1 |       1      3      5      7     12     17     22
+BC INDEX 3 VAL(AZ)
+|  0.00000
+----------------------------------------
+
+        REGIONS
+    1 |       1      3      5      7     12     17     22
+
+--------------------------
+SUMMARIZE BOUNDARY CONDITIONS
+--------------------------
+    BC      DEFINES   COMPARTMENT     DEPENDS     FUNCTION     COMPLEXITY    MEMORY
+----------------------------------------------------------------------
+     1         AX            1                  Surf Galerkin          1         80
+     1         AX            1             AX   Surf Jacobian          1         80
+     1         AX            1             AY   Surf Jacobian          1         80
+     1         AX            1             AZ   Surf Jacobian          1         80
+     1         AX            2                  Surf Galerkin          1         80
+     1         AX            2             AX   Surf Jacobian          1         80
+     1         AX            2             AY   Surf Jacobian          1         80
+     1         AX            2             AZ   Surf Jacobian          1         80
+     1         AX            3                  Surf Galerkin          1         80
+     1         AX            3             AX   Surf Jacobian          1         80
+     1         AX            3             AY   Surf Jacobian          1         80
+     1         AX            3             AZ   Surf Jacobian          1         80
+     1         AX            4                  Surf Galerkin          1         80
+     1         AX            4             AX   Surf Jacobian          1         80
+     1         AX            4             AY   Surf Jacobian          1         80
+     1         AX            4             AZ   Surf Jacobian          1         80
+     1         AX            5                  Surf Galerkin          1         80
+     1         AX            5             AX   Surf Jacobian          1         80
+     1         AX            5             AY   Surf Jacobian          1         80
+     1         AX            5             AZ   Surf Jacobian          1         80
+     1         AX            6                  Surf Galerkin          1         80
+     1         AX            6             AX   Surf Jacobian          1         80
+     1         AX            6             AY   Surf Jacobian          1         80
+     1         AX            6             AZ   Surf Jacobian          1         80
+     1         AX            7                  Surf Galerkin          1         80
+     1         AX            7             AX   Surf Jacobian          1         80
+     1         AX            7             AY   Surf Jacobian          1         80
+     1         AX            7             AZ   Surf Jacobian          1         80
+     2         AY            1                  Surf Galerkin          1         80
+     2         AY            1             AX   Surf Jacobian          1         80
+     2         AY            1             AY   Surf Jacobian          1         80
+     2         AY            1             AZ   Surf Jacobian          1         80
+     2         AY            2                  Surf Galerkin          1         80
+     2         AY            2             AX   Surf Jacobian          1         80
+     2         AY            2             AY   Surf Jacobian          1         80
+     2         AY            2             AZ   Surf Jacobian          1         80
+     2         AY            3                  Surf Galerkin          1         80
+     2         AY            3             AX   Surf Jacobian          1         80
+     2         AY            3             AY   Surf Jacobian          1         80
+     2         AY            3             AZ   Surf Jacobian          1         80
+     2         AY            4                  Surf Galerkin          1         80
+     2         AY            4             AX   Surf Jacobian          1         80
+     2         AY            4             AY   Surf Jacobian          1         80
+     2         AY            4             AZ   Surf Jacobian          1         80
+     2         AY            5                  Surf Galerkin          1         80
+     2         AY            5             AX   Surf Jacobian          1         80
+     2         AY            5             AY   Surf Jacobian          1         80
+     2         AY            5             AZ   Surf Jacobian          1         80
+     2         AY            6                  Surf Galerkin          1         80
+     2         AY            6             AX   Surf Jacobian          1         80
+     2         AY            6             AY   Surf Jacobian          1         80
+     2         AY            6             AZ   Surf Jacobian          1         80
+     2         AY            7                  Surf Galerkin          1         80
+     2         AY            7             AX   Surf Jacobian          1         80
+     2         AY            7             AY   Surf Jacobian          1         80
+     2         AY            7             AZ   Surf Jacobian          1         80
+     3         AZ            1                  Surf Galerkin          1         80
+     3         AZ            1             AX   Surf Jacobian          1         80
+     3         AZ            1             AY   Surf Jacobian          1         80
+     3         AZ            1             AZ   Surf Jacobian          1         80
+     3         AZ            2                  Surf Galerkin          1         80
+     3         AZ            2             AX   Surf Jacobian          1         80
+     3         AZ            2             AY   Surf Jacobian          1         80
+     3         AZ            2             AZ   Surf Jacobian          1         80
+     3         AZ            3                  Surf Galerkin          1         80
+     3         AZ            3             AX   Surf Jacobian          1         80
+     3         AZ            3             AY   Surf Jacobian          1         80
+     3         AZ            3             AZ   Surf Jacobian          1         80
+     3         AZ            4                  Surf Galerkin          1         80
+     3         AZ            4             AX   Surf Jacobian          1         80
+     3         AZ            4             AY   Surf Jacobian          1         80
+     3         AZ            4             AZ   Surf Jacobian          1         80
+     3         AZ            5                  Surf Galerkin          1         80
+     3         AZ            5             AX   Surf Jacobian          1         80
+     3         AZ            5             AY   Surf Jacobian          1         80
+     3         AZ            5             AZ   Surf Jacobian          1         80
+     3         AZ            6                  Surf Galerkin          1         80
+     3         AZ            6             AX   Surf Jacobian          1         80
+     3         AZ            6             AY   Surf Jacobian          1         80
+     3         AZ            6             AZ   Surf Jacobian          1         80
+     3         AZ            7                  Surf Galerkin          1         80
+     3         AZ            7             AX   Surf Jacobian          1         80
+     3         AZ            7             AY   Surf Jacobian          1         80
+     3         AZ            7             AZ   Surf Jacobian          1         80
+
+-------------------------------
+SUMMARIZE PLOT EQUATIONS
+-------------------------------
+                                     BASE        CSE
+   PLOT    ARGUMENT COMPARTMENT  COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------
+     1          1          1          1          1           80
+     1          1          2          1          1           80
+     1          1          3          1          1           80
+     1          1          4          1          1           80
+     1          1          5          1          1           80
+     1          1          6          1          1           80
+     1          1          7          1          1           80
+     1          1          8          1          1           80
+     1          1          9          1          1           80
+     1          1         10          1          1           80
+     1          1         11          1          1           80
+     1          1         12          1          1           80
+     1          1         13          1          1           80
+     1          1         14          1          1           80
+     1          1         15          1          1           80
+     1          1         16          1          1           80
+     1          1         17          1          1           80
+     1          1         18          1          1           80
+     1          1         19          1          1           80
+     1          1         20          1          1           80
+     1          1         21          1          1           80
+     1          1         22          1          1           80
+     1          1         23          1          1           80
+     1          1         24          1          1           80
+     1          2          1          1          1           80
+     1          2          2          1          1           80
+     1          2          3          1          1           80
+     1          2          4          1          1           80
+     1          2          5          1          1           80
+     1          2          6          1          1           80
+     1          2          7          1          1           80
+     1          2          8          1          1           80
+     1          2          9          1          1           80
+     1          2         10          1          1           80
+     1          2         11          1          1           80
+     1          2         12          1          1           80
+     1          2         13          1          1           80
+     1          2         14          1          1           80
+     1          2         15          1          1           80
+     1          2         16          1          1           80
+     1          2         17          1          1           80
+     1          2         18          1          1           80
+     1          2         19          1          1           80
+     1          2         20          1          1           80
+     1          2         21          1          1           80
+     1          2         22          1          1           80
+     1          2         23          1          1           80
+     1          2         24          1          1           80
+     2          1          1          1          1           80
+     2          1          2          1          1           80
+     2          1          3          1          1           80
+     2          1          4          1          1           80
+     2          1          5          1          1           80
+     2          1          6          1          1           80
+     2          1          7          1          1           80
+     2          1          8          1          1           80
+     2          1          9          4          4          320
+     2          1         10          1          1           80
+     2          1         11          4          4          320
+     2          1         12          1          1           80
+     2          1         13          1          1           80
+     2          1         14          4          4          320
+     2          1         15          1          1           80
+     2          1         16          4          4          320
+     2          1         17          1          1           80
+     2          1         18          1          1           80
+     2          1         19          4          4          320
+     2          1         20          1          1           80
+     2          1         21          4          4          320
+     2          1         22          1          1           80
+     2          1         23          4          4          320
+     2          1         24          1          1           80
+     3          1          1         10         10          800
+     3          1          2         10         10          800
+     3          1          3         10         10          800
+     3          1          4         10         10          800
+     3          1          5         10         10          800
+     3          1          6         10         10          800
+     3          1          7         10         10          800
+     3          1          8         10         10          800
+     3          1          9         10         10          800
+     3          1         10         10         10          800
+     3          1         11         10         10          800
+     3          1         12         10         10          800
+     3          1         13         10         10          800
+     3          1         14         10         10          800
+     3          1         15         10         10          800
+     3          1         16         10         10          800
+     3          1         17         10         10          800
+     3          1         18         10         10          800
+     3          1         19         10         10          800
+     3          1         20         10         10          800
+     3          1         21         10         10          800
+     3          1         22         10         10          800
+     3          1         23         10         10          800
+     3          1         24         10         10          800
+
+==UNUSED== PARAMETER DEFINITIONS:
+ RMU             NUDGE           WIRE_LENGTH     AR              EPS            
+ EPS0            EPS_SKIN        EPS_MUSCLE      EPS_FAT         MUU_CB         
+ EPS_CB          EPS_CANB        EPS_IN          EPS_OUT         EPS_DI         
+ BMAG            H               HMAG            CURLX           CURLY          
+ CURLZ          
+
+Uorder=3
+ AX order=3
+ AY order=3
+ AZ order=3
+Orthomin/ILU FINAL ITERATION 45 of 1000 RNORM=2.23127e-010 XNORM=7.28655e-006 Flag=0 MS=18983
+Orthomin/ILU FINAL ITERATION 52 of 1000 RNORM=1.072e-014 XNORM=5.38872e-010 Flag=0 MS=19910
+RMS Spatial Errors   0.000000  0.000000  0.007156
+DO_NEXTSTAGE pde 00000000146D1030  MAXSTAGE=0
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\user\Documents\uwi\3022\coursework3\3022_CW3_simulation\model1\testMagno.pde 11:52:10 5/3/21
+================================================================
+    1| TITLE 'Heat flow around an Insulating Canister'
+    2| COORDINATES
+    3| Cartesian3
+    4| 
+    5| variables
+    6|     Ax        { the azimuthal component of the  vector potential }
+    7|     Ay
+    8|     Az
+    9|  
+   10| definitions
+   11|    Lx =0.05
+   12|    Ly = 0.05
+   13|     mu0 = pi *4e-7            { the permeability }
+   14|     mu 
+   15|     J0 = 0
+   16|     Jx = 0  Jy = 0  Jz = J0
+   17|     J = vector(Jx, Jy, Jz)
+   18|     rmu = 1/ mu
+   19|     nudge = 0.0001
+   20|     wire_length = 0.02
+   21|     pen_len = 1.5/100
+   22|     
+   23|     sth =0.0015                                                                                                   ! Thickness of the skin
+   24|     ar = 0.05                                                                                                        ! radius of the arm
+   25|     fth = 0.0085                                                                                                   ! Thickness of the Fat 
+   26|     mth=0.0275                                                                                                   ! Thickness of muscle 
+   27|     dcb =0.6/100
+   28|     dcanb = ar - sth - mth - fth - dcb 
+   29|     ! Radius  of the wire
+   30|     eps
+   31|     eps0=8.854e-12 							    ! The dielectric permittivity of free space.
+   32|     
+   33|     muu_skin = pi *4e-7 
+   34|     eps_skin = 8.58e2
+   35|     
+   36|     muu_muscle=pi *4e-7 
+   37|     eps_muscle = 8.26e2
+   38|     
+   39|     muu_fat = pi *4e-7 
+   40|     eps_fat = 4.46e2
+   41|     
+   42|     muu_cb =  pi *4e-7 
+   43|     eps_cb = 1.06e2
+   44|     
+   45|     muu_canb =  pi *4e-7
+   46|     eps_canb = 1.85e2
+   47|     
+   48|     muu_in = pi *4e-7
+   49|     eps_in = 1
+   50|     
+   51|     muu_out = pi *4e-7 
+   52|     eps_out = 1
+   53|     
+   54|     muu_di = pi *4e-7 
+   55|     eps_di = 2.1
+   56|     scale = 1
+   57|     
+   58|     wire_rad = (1e-3) * scale
+   59|     cop_out = (1e-3 - 0.75e-3)* scale                                                               !thickness of outside component
+   60|     di_s_d = (0.75e-3 - 0.65e-3) * scale                                                                 !thickness of dielectric
+   61|     cop_in = (0.65e-3 -0.5e-3) * scale
+   62|     hole = wire_rad - cop_in - di_s_d -cop_out
+   63|   
+   64|     current = 2.14
+   65|     B = curl(Ax, Ay, Az)                                                                                         { magnetic flux density }
+   66|     Bmag = magnitude(B)                                                                        ! The Magnitude of the flux density
+   67|     H = B/mu                                                                                      ! The magnetic field strength
+   68|     Hmag = magnitude(H)
+   69|     
+   70|     curlx = (dy(Az) - dz(Ay))/mu
+   71|     curly = (dz(Ax) - dx(Az))/mu
+   72|     curlz = (dx(Az) - dy(Ax))/mu
+   73| 
+   74|     
+   75| !initial values
+   76|     !Aphi = 2            { unimportant unless mu varies with H }
+   77|  
+   78| equations
+   79| 
+   80|     Ax: dx( dx(Ax)/mu)+ dy( dy(Ax)/mu)+ dz( dz(Ax)/mu)=-Jx
+   81|     Ay: dx( dx(Ay)/mu)+ dy( dy(Ay)/mu)+ dz( dz(Ay)/mu)=-Jy
+   82|     Az: dx( dx(Az)/mu)+ dy( dy(Az)/mu)+ dz( dz(Az)/mu)=-Jz
+   83|     { FlexPDE expands CURL in proper coordinates }
+   84|     {Ax: dy(curlz) - dz(curly) = Jx
+   85|     Ay: dz(curlx) - dx(curlz) = Jy
+   86|     Az: dx(curlz) - dy(curlx) = Jz}
+   87|     !Aphi: curl(rmu*curl(Aphi)) = J
+   88|     
+   89| EXTRUSION
+   90| SURFACE 'Bottom' z=0
+   91|       LAYER 'Cancellous Bone'
+   92| SURFACE 'Can top' z=dcanb
+   93|       LAYER 'Cortical Bone'
+   94| SURFACE 'Cor Top' z=dcb + dcanb
+   95|       LAYER 'Muscle'
+   96| SURFACE 'Cablebot' z=sth + fth + mth + dcb - dcanb-pen_len
+   97| SURFACE 'Mus Top' z=mth + dcb + dcanb
+   98|       LAYER 'Fat'
+   99| SURFACE 'Fat top' z=fth + mth + dcb + dcanb
+  100|       LAYER 'Skin'
+  101| SURFACE 'skin Top' z=sth + fth + mth + dcb + dcanb
+  102| SURFACE 'Top' z=0.08
+  103| 
+  104| BOUNDARIES
+  105| REGION 1 'box' 
+  106|       eps = eps0
+  107|       mu = mu0
+  108|       START(-Lx,-Ly)
+  109|       value(Ax) = 0  value(Ay) = 0  value(Az) = 0
+  110|       LINE TO (Lx,-Ly) TO (Lx,Ly) TO (-Lx,Ly) TO CLOSE
+  111|         
+  112| LIMITED REGION 2 'tissue' { the embedded blob }
+  113|      LAYER 1 
+  114|      mu = muu_canb
+  115|      eps = eps_canb*eps0
+  116|         
+  117|      LAYER 2 
+  118|      mu = muu_canb
+  119|      eps = eps_cb*eps0
+  120|         
+  121|      LAYER 3 
+  122|      mu = muu_muscle
+  123|      eps = eps_muscle*eps0
+  124|     
+  125|      LAYER 4 
+  126|      mu = muu_muscle
+  127|      eps = eps_muscle*eps0
+  128|         
+  129|      LAYER 5 
+  130|      mu = muu_fat
+  131|      eps = eps_fat*eps0
+  132|         
+  133|      LAYER 6 
+  134|      mu = muu_skin
+  135|      eps = eps_skin*eps0
+  136|      
+  137| LIMITED REGION 3 'Terminal' { the embedded blob }
+  138|      LAYER 4 
+  139|      mu = muu_in
+  140|      eps = eps_in*eps0
+  141|      J0 = current/(pi*((hole + cop_in)^2 - hole^2))
+  142|         
+  143|      LAYER 5 
+  144|      mu = muu_in
+  145|      eps = eps_in*eps0
+  146|      J0 = current/(pi*((hole + cop_in)^2 - hole^2))
+  147|         
+  148|      LAYER 6 
+  149|      mu = muu_in
+  150|      eps = eps_in*eps0
+  151|      J0 = current/(pi*((hole + cop_in)^2 - hole^2))
+  152|      
+  153|      LAYER 7
+  154|      mu = muu_in
+  155|      eps = eps_in*eps0
+  156|      J0 = current/(pi*((hole + cop_in)^2 - hole^2))
+  157|      
+  158|      START(cop_in+hole, 0)
+  159|      arc(center = 0, 0) angle 360 to close
+  160|      
+  161|      start(hole, 0)
+  162|      arc(center = 0, 0) angle 360 to close
+  163|      
+  164| LIMITED REGION 4 'Dielectric_Tissue' { the embedded blob }
+  165|      LAYER 4 
+  166|      mu = muu_di
+  167|      eps = eps_di*eps0
+  168|         
+  169|      LAYER 5 
+  170|      mu = muu_di
+  171|      eps = eps_di*eps0
+  172|         
+  173|      LAYER 6 
+  174|      mu = muu_di
+  175|      eps = eps_di*eps0
+  176|      
+  177|      START(di_s_d+cop_in+hole, 0)
+  178|      arc(center = 0, 0) angle 360 to close
+  179|      
+  180|      start(cop_in+hole, 0)
+  181|      arc(center = 0, 0) angle 360 to close
+  182|      
+  183| LIMITED REGION 5 'Dielectric' { the embedded blob }
+  184|      LAYER 7
+  185|      mu = muu_di
+  186|      eps = eps_di*eps0
+  187|      
+  188|      START(wire_rad, 0)
+  189|      arc(center = 0, 0) angle 360 to close
+  190|      
+  191|      start(cop_in+hole, 0)
+  192|      arc(center = 0, 0) angle 360 to close
+  193|      
+  194| LIMITED REGION 6 'Ground' { the embedded blob }
+  195|      LAYER 4 
+  196|      J0 = -current/(pi*((hole + cop_in + cop_out)^2 - (hole + cop_in)^2))
+  197|      mu = muu_out
+  198|      eps = eps_out*eps0
+  199|         
+  200|      LAYER 5 
+  201|      J0 = -current/(pi*((hole + cop_in + cop_out)^2 - (hole + cop_in)^2))
+  202|      mu = muu_out
+  203|      eps = eps_out*eps0
+  204|         
+  205|      LAYER 6 
+  206|      J0 = -current/(pi*((hole + cop_in + cop_out)^2 - (hole + cop_in)^2))
+  207|      mu = muu_out
+  208|      eps = eps_out*eps0
+  209|      
+  210|      START(cop_out + di_s_d+cop_in+hole, 0)
+  211|      arc(center = 0, 0) angle 360 to close
+  212|      
+  213|      start(di_s_d + cop_in+hole, 0)
+  214|      arc(center = 0, 0) angle 360 to close
+  215|      
+  216| PLOTS
+  217| GRID(y,z) ON x=0
+  218|  !CONTOUR(Ax^2 + Ay^2) ON z=0
+  219|      VECTOR(J) ON x=0
+  220|      vector(B) ON z = sth + fth + mth + dcb - dcanb-pen_len
+  221|      !ELEVATION(v) FROM (0,-1,0) to (0,1,0) { note 3D coordinates }
+  222| END
+LOG Threads=1 Order=3 Speed=1 Stability=0
+Uorder=3
+ AX order=3
+ AY order=3
+ AZ order=3
+IMPORTMESH(0) NDIM=3 NB=20 NAB=4 NODES=12030 CELLS=67390 SIDES=135690 LEGS=80329 imaging=0 time(0)=0
+Joint 17 Node 435 distance=3.35965e-322 > fuzz(0.00219)
+MESH IMPORT ABORTED: Joint Positions Don't Match
+Transferred mesh does not match local domain!
+(Boundary descriptions must match exactly.)
+MESH GENERATION LAYER 1 REGION 1
+MESH GENERATION LAYER 2 REGION 1
+MESH GENERATION LAYER 3 REGION 1
+MESH GENERATION LAYER 4 REGION 1
+MESH GENERATION LAYER 4 REGION 3
+MESH GENERATION LAYER 4 REGION 4
+MESH GENERATION LAYER 4 REGION 6
+MESH GENERATION LAYER 5 REGION 1
+MESH GENERATION LAYER 5 REGION 3
+MESH GENERATION LAYER 5 REGION 4
+MESH GENERATION LAYER 5 REGION 6
+MESH GENERATION LAYER 6 REGION 1
+MESH GENERATION LAYER 6 REGION 3
+MESH GENERATION LAYER 6 REGION 4
+MESH GENERATION LAYER 6 REGION 6
+MESH GENERATION LAYER 7 REGION 1
+MESH GENERATION LAYER 7 REGION 3
+MESH GENERATION LAYER 7 REGION 5
+
+
+ BDID LINKUPS ACROSS PINCHED LAYERS COULD BE REPLACED BY COMMON SIDE REFERENCES (DOMAINSPEC4465)
+3D MESH GENERATION TIME 144624 MS
+
+SUMMARIZE 51 PARAMETERS (NO COMMON SUBEXPRESSION ELIMINATION)
+   Param         Compartment       Complexity     Memory
+--------------------------------------------------------------
+             LX      0                    1         80
+             LY      0                    1         80
+            MU0      0                    1         80
+             MU      1                    1         80
+             MU      2                    1         80
+             MU      3                    1         80
+             MU      4                    1         80
+             MU      5                    1         80
+             MU      6                    1         80
+             MU      7                    1         80
+             MU      8                    1         80
+             MU      9                    1         80
+             MU     10                    1         80
+             MU     11                    1         80
+             MU     12                    1         80
+             MU     13                    1         80
+             MU     14                    1         80
+             MU     15                    1         80
+             MU     16                    1         80
+             MU     17                    1         80
+             MU     18                    1         80
+             MU     19                    1         80
+             MU     20                    1         80
+             MU     21                    1         80
+             MU     22                    1         80
+             MU     23                    1         80
+             MU     24                    1         80
+             J0      1                    1         80
+             J0      2                    1         80
+             J0      3                    1         80
+             J0      4                    1         80
+             J0      5                    1         80
+             J0      6                    1         80
+             J0      7                    1         80
+             J0      8                    1         80
+             J0      9                    1         80
+             J0     10                    1         80
+             J0     11                    1         80
+             J0     12                    1         80
+             J0     13                    1         80
+             J0     14                    1         80
+             J0     15                    1         80
+             J0     16                    1         80
+             J0     17                    1         80
+             J0     18                    1         80
+             J0     19                    1         80
+             J0     20                    1         80
+             J0     21                    1         80
+             J0     22                    1         80
+             J0     23                    1         80
+             J0     24                    1         80
+             JX      0                    1         80
+             JY      0                    1         80
+             JZ      1                    1         80
+             JZ      2                    1         80
+             JZ      3                    1         80
+             JZ      4                    1         80
+             JZ      5                    1         80
+             JZ      6                    1         80
+             JZ      7                    1         80
+             JZ      8                    1         80
+             JZ      9                    1         80
+             JZ     10                    1         80
+             JZ     11                    1         80
+             JZ     12                    1         80
+             JZ     13                    1         80
+             JZ     14                    1         80
+             JZ     15                    1         80
+             JZ     16                    1         80
+             JZ     17                    1         80
+             JZ     18                    1         80
+             JZ     19                    1         80
+             JZ     20                    1         80
+             JZ     21                    1         80
+             JZ     22                    1         80
+             JZ     23                    1         80
+             JZ     24                    1         80
+              J      1                    1         80
+              J      2                    1         80
+              J      3                    1         80
+              J      4                    1         80
+              J      5                    1         80
+              J      6                    1         80
+              J      7                    1         80
+              J      8                    1         80
+              J      9                    4        320
+              J     10                    1         80
+              J     11                    4        320
+              J     12                    1         80
+              J     13                    1         80
+              J     14                    4        320
+              J     15                    1         80
+              J     16                    4        320
+              J     17                    1         80
+              J     18                    1         80
+              J     19                    4        320
+              J     20                    1         80
+              J     21                    4        320
+              J     22                    1         80
+              J     23                    4        320
+              J     24                    1         80
+            RMU      1                    1         80
+            RMU      2                    1         80
+            RMU      3                    1         80
+            RMU      4                    1         80
+            RMU      5                    1         80
+            RMU      6                    1         80
+            RMU      7                    1         80
+            RMU      8                    1         80
+            RMU      9                    1         80
+            RMU     10                    1         80
+            RMU     11                    1         80
+            RMU     12                    1         80
+            RMU     13                    1         80
+            RMU     14                    1         80
+            RMU     15                    1         80
+            RMU     16                    1         80
+            RMU     17                    1         80
+            RMU     18                    1         80
+            RMU     19                    1         80
+            RMU     20                    1         80
+            RMU     21                    1         80
+            RMU     22                    1         80
+            RMU     23                    1         80
+            RMU     24                    1         80
+          NUDGE      0                    1         80
+    WIRE_LENGTH      0                    1         80
+        PEN_LEN      0                    1         80
+            STH      0                    1         80
+             AR      0                    1         80
+            FTH      0                    1         80
+            MTH      0                    1         80
+            DCB      0                    1         80
+          DCANB      0                    1         80
+            EPS      1                    1         80
+            EPS      2                    1         80
+            EPS      3                    1         80
+            EPS      4                    1         80
+            EPS      5                    1         80
+            EPS      6                    1         80
+            EPS      7                    1         80
+            EPS      8                    1         80
+            EPS      9                    1         80
+            EPS     10                    1         80
+            EPS     11                    1         80
+            EPS     12                    1         80
+            EPS     13                    1         80
+            EPS     14                    1         80
+            EPS     15                    1         80
+            EPS     16                    1         80
+            EPS     17                    1         80
+            EPS     18                    1         80
+            EPS     19                    1         80
+            EPS     20                    1         80
+            EPS     21                    1         80
+            EPS     22                    1         80
+            EPS     23                    1         80
+            EPS     24                    1         80
+           EPS0      0                    1         80
+       MUU_SKIN      0                    1         80
+       EPS_SKIN      0                    1         80
+     MUU_MUSCLE      0                    1         80
+     EPS_MUSCLE      0                    1         80
+        MUU_FAT      0                    1         80
+        EPS_FAT      0                    1         80
+         MUU_CB      0                    1         80
+         EPS_CB      0                    1         80
+       MUU_CANB      0                    1         80
+       EPS_CANB      0                    1         80
+         MUU_IN      0                    1         80
+         EPS_IN      0                    1         80
+        MUU_OUT      0                    1         80
+        EPS_OUT      0                    1         80
+         MUU_DI      0                    1         80
+         EPS_DI      0                    1         80
+          SCALE      0                    1         80
+       WIRE_RAD      0                    1         80
+        COP_OUT      0                    1         80
+         DI_S_D      0                    1         80
+         COP_IN      0                    1         80
+           HOLE      0                    1         80
+        CURRENT      0                    1         80
+              B      0                   10        800
+           BMAG      0                   15       1200
+              H      1                   16       1280
+              H      2                   16       1280
+              H      3                   16       1280
+              H      4                   16       1280
+              H      5                   16       1280
+              H      6                   16       1280
+              H      7                   16       1280
+              H      8                   16       1280
+              H      9                   16       1280
+              H     10                   16       1280
+              H     11                   16       1280
+              H     12                   16       1280
+              H     13                   16       1280
+              H     14                   16       1280
+              H     15                   16       1280
+              H     16                   16       1280
+              H     17                   16       1280
+              H     18                   16       1280
+              H     19                   16       1280
+              H     20                   16       1280
+              H     21                   16       1280
+              H     22                   16       1280
+              H     23                   16       1280
+              H     24                   16       1280
+           HMAG      1                   21       1680
+           HMAG      2                   21       1680
+           HMAG      3                   21       1680
+           HMAG      4                   21       1680
+           HMAG      5                   21       1680
+           HMAG      6                   21       1680
+           HMAG      7                   21       1680
+           HMAG      8                   21       1680
+           HMAG      9                   21       1680
+           HMAG     10                   21       1680
+           HMAG     11                   21       1680
+           HMAG     12                   21       1680
+           HMAG     13                   21       1680
+           HMAG     14                   21       1680
+           HMAG     15                   21       1680
+           HMAG     16                   21       1680
+           HMAG     17                   21       1680
+           HMAG     18                   21       1680
+           HMAG     19                   21       1680
+           HMAG     20                   21       1680
+           HMAG     21                   21       1680
+           HMAG     22                   21       1680
+           HMAG     23                   21       1680
+           HMAG     24                   21       1680
+          CURLX      1                    5        400
+          CURLX      2                    5        400
+          CURLX      3                    5        400
+          CURLX      4                    5        400
+          CURLX      5                    5        400
+          CURLX      6                    5        400
+          CURLX      7                    5        400
+          CURLX      8                    5        400
+          CURLX      9                    5        400
+          CURLX     10                    5        400
+          CURLX     11                    5        400
+          CURLX     12                    5        400
+          CURLX     13                    5        400
+          CURLX     14                    5        400
+          CURLX     15                    5        400
+          CURLX     16                    5        400
+          CURLX     17                    5        400
+          CURLX     18                    5        400
+          CURLX     19                    5        400
+          CURLX     20                    5        400
+          CURLX     21                    5        400
+          CURLX     22                    5        400
+          CURLX     23                    5        400
+          CURLX     24                    5        400
+          CURLY      1                    5        400
+          CURLY      2                    5        400
+          CURLY      3                    5        400
+          CURLY      4                    5        400
+          CURLY      5                    5        400
+          CURLY      6                    5        400
+          CURLY      7                    5        400
+          CURLY      8                    5        400
+          CURLY      9                    5        400
+          CURLY     10                    5        400
+          CURLY     11                    5        400
+          CURLY     12                    5        400
+          CURLY     13                    5        400
+          CURLY     14                    5        400
+          CURLY     15                    5        400
+          CURLY     16                    5        400
+          CURLY     17                    5        400
+          CURLY     18                    5        400
+          CURLY     19                    5        400
+          CURLY     20                    5        400
+          CURLY     21                    5        400
+          CURLY     22                    5        400
+          CURLY     23                    5        400
+          CURLY     24                    5        400
+          CURLZ      1                    5        400
+          CURLZ      2                    5        400
+          CURLZ      3                    5        400
+          CURLZ      4                    5        400
+          CURLZ      5                    5        400
+          CURLZ      6                    5        400
+          CURLZ      7                    5        400
+          CURLZ      8                    5        400
+          CURLZ      9                    5        400
+          CURLZ     10                    5        400
+          CURLZ     11                    5        400
+          CURLZ     12                    5        400
+          CURLZ     13                    5        400
+          CURLZ     14                    5        400
+          CURLZ     15                    5        400
+          CURLZ     16                    5        400
+          CURLZ     17                    5        400
+          CURLZ     18                    5        400
+          CURLZ     19                    5        400
+          CURLZ     20                    5        400
+          CURLZ     21                    5        400
+          CURLZ     22                    5        400
+          CURLZ     23                    5        400
+          CURLZ     24                    5        400
+
+--------------------------
+SUMMARIZE EQUATIONS
+--------------------------
+           DEFINES               DEPENDS                    BASE         CSE
+ EQUATION    VAR    COMPARTMENT    VAR       FUNCTION     COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------------------------------
+     1         AX          1                       Source          1            2          160
+     1         AX          1                     Galerkin         15           15         1200
+     1         AX          1           AX        Jacobian         15           15         1200
+     1         AX          1                Surf Galerkin         14           14         1120
+     1         AX          1           AX   Surf Jacobian         14           14         1120
+     1         AX          2                       Source          1            2          160
+     1         AX          2                     Galerkin         15           15         1200
+     1         AX          2           AX        Jacobian         15           15         1200
+     1         AX          2                Surf Galerkin         14           14         1120
+     1         AX          2           AX   Surf Jacobian         14           14         1120
+     1         AX          3                       Source          1            2          160
+     1         AX          3                     Galerkin         15           15         1200
+     1         AX          3           AX        Jacobian         15           15         1200
+     1         AX          3                Surf Galerkin         14           14         1120
+     1         AX          3           AX   Surf Jacobian         14           14         1120
+     1         AX          4                       Source          1            2          160
+     1         AX          4                     Galerkin         15           15         1200
+     1         AX          4           AX        Jacobian         15           15         1200
+     1         AX          4                Surf Galerkin         14           14         1120
+     1         AX          4           AX   Surf Jacobian         14           14         1120
+     1         AX          5                       Source          1            2          160
+     1         AX          5                     Galerkin         15           15         1200
+     1         AX          5           AX        Jacobian         15           15         1200
+     1         AX          5                Surf Galerkin         14           14         1120
+     1         AX          5           AX   Surf Jacobian         14           14         1120
+     1         AX          6                       Source          1            2          160
+     1         AX          6                     Galerkin         15           15         1200
+     1         AX          6           AX        Jacobian         15           15         1200
+     1         AX          6                Surf Galerkin         14           14         1120
+     1         AX          6           AX   Surf Jacobian         14           14         1120
+     1         AX          7                       Source          1            2          160
+     1         AX          7                     Galerkin         15           15         1200
+     1         AX          7           AX        Jacobian         15           15         1200
+     1         AX          7                Surf Galerkin         14           14         1120
+     1         AX          7           AX   Surf Jacobian         14           14         1120
+     1         AX          8                       Source          1            2          160
+     1         AX          8                     Galerkin         15           15         1200
+     1         AX          8           AX        Jacobian         15           15         1200
+     1         AX          8                Surf Galerkin         14           14         1120
+     1         AX          8           AX   Surf Jacobian         14           14         1120
+     1         AX          9                       Source          1            2          160
+     1         AX          9                     Galerkin         15           15         1200
+     1         AX          9           AX        Jacobian         15           15         1200
+     1         AX          9                Surf Galerkin         14           14         1120
+     1         AX          9           AX   Surf Jacobian         14           14         1120
+     1         AX         10                       Source          1            2          160
+     1         AX         10                     Galerkin         15           15         1200
+     1         AX         10           AX        Jacobian         15           15         1200
+     1         AX         10                Surf Galerkin         14           14         1120
+     1         AX         10           AX   Surf Jacobian         14           14         1120
+     1         AX         11                       Source          1            2          160
+     1         AX         11                     Galerkin         15           15         1200
+     1         AX         11           AX        Jacobian         15           15         1200
+     1         AX         11                Surf Galerkin         14           14         1120
+     1         AX         11           AX   Surf Jacobian         14           14         1120
+     1         AX         12                       Source          1            2          160
+     1         AX         12                     Galerkin         15           15         1200
+     1         AX         12           AX        Jacobian         15           15         1200
+     1         AX         12                Surf Galerkin         14           14         1120
+     1         AX         12           AX   Surf Jacobian         14           14         1120
+     1         AX         13                       Source          1            2          160
+     1         AX         13                     Galerkin         15           15         1200
+     1         AX         13           AX        Jacobian         15           15         1200
+     1         AX         13                Surf Galerkin         14           14         1120
+     1         AX         13           AX   Surf Jacobian         14           14         1120
+     1         AX         14                       Source          1            2          160
+     1         AX         14                     Galerkin         15           15         1200
+     1         AX         14           AX        Jacobian         15           15         1200
+     1         AX         14                Surf Galerkin         14           14         1120
+     1         AX         14           AX   Surf Jacobian         14           14         1120
+     1         AX         15                       Source          1            2          160
+     1         AX         15                     Galerkin         15           15         1200
+     1         AX         15           AX        Jacobian         15           15         1200
+     1         AX         15                Surf Galerkin         14           14         1120
+     1         AX         15           AX   Surf Jacobian         14           14         1120
+     1         AX         16                       Source          1            2          160
+     1         AX         16                     Galerkin         15           15         1200
+     1         AX         16           AX        Jacobian         15           15         1200
+     1         AX         16                Surf Galerkin         14           14         1120
+     1         AX         16           AX   Surf Jacobian         14           14         1120
+     1         AX         17                       Source          1            2          160
+     1         AX         17                     Galerkin         15           15         1200
+     1         AX         17           AX        Jacobian         15           15         1200
+     1         AX         17                Surf Galerkin         14           14         1120
+     1         AX         17           AX   Surf Jacobian         14           14         1120
+     1         AX         18                       Source          1            2          160
+     1         AX         18                     Galerkin         15           15         1200
+     1         AX         18           AX        Jacobian         15           15         1200
+     1         AX         18                Surf Galerkin         14           14         1120
+     1         AX         18           AX   Surf Jacobian         14           14         1120
+     1         AX         19                       Source          1            2          160
+     1         AX         19                     Galerkin         15           15         1200
+     1         AX         19           AX        Jacobian         15           15         1200
+     1         AX         19                Surf Galerkin         14           14         1120
+     1         AX         19           AX   Surf Jacobian         14           14         1120
+     1         AX         20                       Source          1            2          160
+     1         AX         20                     Galerkin         15           15         1200
+     1         AX         20           AX        Jacobian         15           15         1200
+     1         AX         20                Surf Galerkin         14           14         1120
+     1         AX         20           AX   Surf Jacobian         14           14         1120
+     1         AX         21                       Source          1            2          160
+     1         AX         21                     Galerkin         15           15         1200
+     1         AX         21           AX        Jacobian         15           15         1200
+     1         AX         21                Surf Galerkin         14           14         1120
+     1         AX         21           AX   Surf Jacobian         14           14         1120
+     1         AX         22                       Source          1            2          160
+     1         AX         22                     Galerkin         15           15         1200
+     1         AX         22           AX        Jacobian         15           15         1200
+     1         AX         22                Surf Galerkin         14           14         1120
+     1         AX         22           AX   Surf Jacobian         14           14         1120
+     1         AX         23                       Source          1            2          160
+     1         AX         23                     Galerkin         15           15         1200
+     1         AX         23           AX        Jacobian         15           15         1200
+     1         AX         23                Surf Galerkin         14           14         1120
+     1         AX         23           AX   Surf Jacobian         14           14         1120
+     1         AX         24                       Source          1            2          160
+     1         AX         24                     Galerkin         15           15         1200
+     1         AX         24           AX        Jacobian         15           15         1200
+     1         AX         24                Surf Galerkin         14           14         1120
+     1         AX         24           AX   Surf Jacobian         14           14         1120
+     2         AY          1                       Source          1            2          160
+     2         AY          1                     Galerkin         15           15         1200
+     2         AY          1           AY        Jacobian         15           15         1200
+     2         AY          1                Surf Galerkin         14           14         1120
+     2         AY          1           AY   Surf Jacobian         14           14         1120
+     2         AY          2                       Source          1            2          160
+     2         AY          2                     Galerkin         15           15         1200
+     2         AY          2           AY        Jacobian         15           15         1200
+     2         AY          2                Surf Galerkin         14           14         1120
+     2         AY          2           AY   Surf Jacobian         14           14         1120
+     2         AY          3                       Source          1            2          160
+     2         AY          3                     Galerkin         15           15         1200
+     2         AY          3           AY        Jacobian         15           15         1200
+     2         AY          3                Surf Galerkin         14           14         1120
+     2         AY          3           AY   Surf Jacobian         14           14         1120
+     2         AY          4                       Source          1            2          160
+     2         AY          4                     Galerkin         15           15         1200
+     2         AY          4           AY        Jacobian         15           15         1200
+     2         AY          4                Surf Galerkin         14           14         1120
+     2         AY          4           AY   Surf Jacobian         14           14         1120
+     2         AY          5                       Source          1            2          160
+     2         AY          5                     Galerkin         15           15         1200
+     2         AY          5           AY        Jacobian         15           15         1200
+     2         AY          5                Surf Galerkin         14           14         1120
+     2         AY          5           AY   Surf Jacobian         14           14         1120
+     2         AY          6                       Source          1            2          160
+     2         AY          6                     Galerkin         15           15         1200
+     2         AY          6           AY        Jacobian         15           15         1200
+     2         AY          6                Surf Galerkin         14           14         1120
+     2         AY          6           AY   Surf Jacobian         14           14         1120
+     2         AY          7                       Source          1            2          160
+     2         AY          7                     Galerkin         15           15         1200
+     2         AY          7           AY        Jacobian         15           15         1200
+     2         AY          7                Surf Galerkin         14           14         1120
+     2         AY          7           AY   Surf Jacobian         14           14         1120
+     2         AY          8                       Source          1            2          160
+     2         AY          8                     Galerkin         15           15         1200
+     2         AY          8           AY        Jacobian         15           15         1200
+     2         AY          8                Surf Galerkin         14           14         1120
+     2         AY          8           AY   Surf Jacobian         14           14         1120
+     2         AY          9                       Source          1            2          160
+     2         AY          9                     Galerkin         15           15         1200
+     2         AY          9           AY        Jacobian         15           15         1200
+     2         AY          9                Surf Galerkin         14           14         1120
+     2         AY          9           AY   Surf Jacobian         14           14         1120
+     2         AY         10                       Source          1            2          160
+     2         AY         10                     Galerkin         15           15         1200
+     2         AY         10           AY        Jacobian         15           15         1200
+     2         AY         10                Surf Galerkin         14           14         1120
+     2         AY         10           AY   Surf Jacobian         14           14         1120
+     2         AY         11                       Source          1            2          160
+     2         AY         11                     Galerkin         15           15         1200
+     2         AY         11           AY        Jacobian         15           15         1200
+     2         AY         11                Surf Galerkin         14           14         1120
+     2         AY         11           AY   Surf Jacobian         14           14         1120
+     2         AY         12                       Source          1            2          160
+     2         AY         12                     Galerkin         15           15         1200
+     2         AY         12           AY        Jacobian         15           15         1200
+     2         AY         12                Surf Galerkin         14           14         1120
+     2         AY         12           AY   Surf Jacobian         14           14         1120
+     2         AY         13                       Source          1            2          160
+     2         AY         13                     Galerkin         15           15         1200
+     2         AY         13           AY        Jacobian         15           15         1200
+     2         AY         13                Surf Galerkin         14           14         1120
+     2         AY         13           AY   Surf Jacobian         14           14         1120
+     2         AY         14                       Source          1            2          160
+     2         AY         14                     Galerkin         15           15         1200
+     2         AY         14           AY        Jacobian         15           15         1200
+     2         AY         14                Surf Galerkin         14           14         1120
+     2         AY         14           AY   Surf Jacobian         14           14         1120
+     2         AY         15                       Source          1            2          160
+     2         AY         15                     Galerkin         15           15         1200
+     2         AY         15           AY        Jacobian         15           15         1200
+     2         AY         15                Surf Galerkin         14           14         1120
+     2         AY         15           AY   Surf Jacobian         14           14         1120
+     2         AY         16                       Source          1            2          160
+     2         AY         16                     Galerkin         15           15         1200
+     2         AY         16           AY        Jacobian         15           15         1200
+     2         AY         16                Surf Galerkin         14           14         1120
+     2         AY         16           AY   Surf Jacobian         14           14         1120
+     2         AY         17                       Source          1            2          160
+     2         AY         17                     Galerkin         15           15         1200
+     2         AY         17           AY        Jacobian         15           15         1200
+     2         AY         17                Surf Galerkin         14           14         1120
+     2         AY         17           AY   Surf Jacobian         14           14         1120
+     2         AY         18                       Source          1            2          160
+     2         AY         18                     Galerkin         15           15         1200
+     2         AY         18           AY        Jacobian         15           15         1200
+     2         AY         18                Surf Galerkin         14           14         1120
+     2         AY         18           AY   Surf Jacobian         14           14         1120
+     2         AY         19                       Source          1            2          160
+     2         AY         19                     Galerkin         15           15         1200
+     2         AY         19           AY        Jacobian         15           15         1200
+     2         AY         19                Surf Galerkin         14           14         1120
+     2         AY         19           AY   Surf Jacobian         14           14         1120
+     2         AY         20                       Source          1            2          160
+     2         AY         20                     Galerkin         15           15         1200
+     2         AY         20           AY        Jacobian         15           15         1200
+     2         AY         20                Surf Galerkin         14           14         1120
+     2         AY         20           AY   Surf Jacobian         14           14         1120
+     2         AY         21                       Source          1            2          160
+     2         AY         21                     Galerkin         15           15         1200
+     2         AY         21           AY        Jacobian         15           15         1200
+     2         AY         21                Surf Galerkin         14           14         1120
+     2         AY         21           AY   Surf Jacobian         14           14         1120
+     2         AY         22                       Source          1            2          160
+     2         AY         22                     Galerkin         15           15         1200
+     2         AY         22           AY        Jacobian         15           15         1200
+     2         AY         22                Surf Galerkin         14           14         1120
+     2         AY         22           AY   Surf Jacobian         14           14         1120
+     2         AY         23                       Source          1            2          160
+     2         AY         23                     Galerkin         15           15         1200
+     2         AY         23           AY        Jacobian         15           15         1200
+     2         AY         23                Surf Galerkin         14           14         1120
+     2         AY         23           AY   Surf Jacobian         14           14         1120
+     2         AY         24                       Source          1            2          160
+     2         AY         24                     Galerkin         15           15         1200
+     2         AY         24           AY        Jacobian         15           15         1200
+     2         AY         24                Surf Galerkin         14           14         1120
+     2         AY         24           AY   Surf Jacobian         14           14         1120
+     3         AZ          1                       Source          1            2          160
+     3         AZ          1                     Galerkin         15           15         1200
+     3         AZ          1           AZ        Jacobian         15           15         1200
+     3         AZ          1                Surf Galerkin         14           14         1120
+     3         AZ          1           AZ   Surf Jacobian         14           14         1120
+     3         AZ          2                       Source          1            2          160
+     3         AZ          2                     Galerkin         15           15         1200
+     3         AZ          2           AZ        Jacobian         15           15         1200
+     3         AZ          2                Surf Galerkin         14           14         1120
+     3         AZ          2           AZ   Surf Jacobian         14           14         1120
+     3         AZ          3                       Source          1            2          160
+     3         AZ          3                     Galerkin         15           15         1200
+     3         AZ          3           AZ        Jacobian         15           15         1200
+     3         AZ          3                Surf Galerkin         14           14         1120
+     3         AZ          3           AZ   Surf Jacobian         14           14         1120
+     3         AZ          4                       Source          1            2          160
+     3         AZ          4                     Galerkin         15           15         1200
+     3         AZ          4           AZ        Jacobian         15           15         1200
+     3         AZ          4                Surf Galerkin         14           14         1120
+     3         AZ          4           AZ   Surf Jacobian         14           14         1120
+     3         AZ          5                       Source          1            2          160
+     3         AZ          5                     Galerkin         15           15         1200
+     3         AZ          5           AZ        Jacobian         15           15         1200
+     3         AZ          5                Surf Galerkin         14           14         1120
+     3         AZ          5           AZ   Surf Jacobian         14           14         1120
+     3         AZ          6                       Source          1            2          160
+     3         AZ          6                     Galerkin         15           15         1200
+     3         AZ          6           AZ        Jacobian         15           15         1200
+     3         AZ          6                Surf Galerkin         14           14         1120
+     3         AZ          6           AZ   Surf Jacobian         14           14         1120
+     3         AZ          7                       Source          1            2          160
+     3         AZ          7                     Galerkin         15           15         1200
+     3         AZ          7           AZ        Jacobian         15           15         1200
+     3         AZ          7                Surf Galerkin         14           14         1120
+     3         AZ          7           AZ   Surf Jacobian         14           14         1120
+     3         AZ          8                       Source          1            2          160
+     3         AZ          8                     Galerkin         15           15         1200
+     3         AZ          8           AZ        Jacobian         15           15         1200
+     3         AZ          8                Surf Galerkin         14           14         1120
+     3         AZ          8           AZ   Surf Jacobian         14           14         1120
+     3         AZ          9                       Source          1            2          160
+     3         AZ          9                     Galerkin         15           15         1200
+     3         AZ          9           AZ        Jacobian         15           15         1200
+     3         AZ          9                Surf Galerkin         14           14         1120
+     3         AZ          9           AZ   Surf Jacobian         14           14         1120
+     3         AZ         10                       Source          1            2          160
+     3         AZ         10                     Galerkin         15           15         1200
+     3         AZ         10           AZ        Jacobian         15           15         1200
+     3         AZ         10                Surf Galerkin         14           14         1120
+     3         AZ         10           AZ   Surf Jacobian         14           14         1120
+     3         AZ         11                       Source          1            2          160
+     3         AZ         11                     Galerkin         15           15         1200
+     3         AZ         11           AZ        Jacobian         15           15         1200
+     3         AZ         11                Surf Galerkin         14           14         1120
+     3         AZ         11           AZ   Surf Jacobian         14           14         1120
+     3         AZ         12                       Source          1            2          160
+     3         AZ         12                     Galerkin         15           15         1200
+     3         AZ         12           AZ        Jacobian         15           15         1200
+     3         AZ         12                Surf Galerkin         14           14         1120
+     3         AZ         12           AZ   Surf Jacobian         14           14         1120
+     3         AZ         13                       Source          1            2          160
+     3         AZ         13                     Galerkin         15           15         1200
+     3         AZ         13           AZ        Jacobian         15           15         1200
+     3         AZ         13                Surf Galerkin         14           14         1120
+     3         AZ         13           AZ   Surf Jacobian         14           14         1120
+     3         AZ         14                       Source          1            2          160
+     3         AZ         14                     Galerkin         15           15         1200
+     3         AZ         14           AZ        Jacobian         15           15         1200
+     3         AZ         14                Surf Galerkin         14           14         1120
+     3         AZ         14           AZ   Surf Jacobian         14           14         1120
+     3         AZ         15                       Source          1            2          160
+     3         AZ         15                     Galerkin         15           15         1200
+     3         AZ         15           AZ        Jacobian         15           15         1200
+     3         AZ         15                Surf Galerkin         14           14         1120
+     3         AZ         15           AZ   Surf Jacobian         14           14         1120
+     3         AZ         16                       Source          1            2          160
+     3         AZ         16                     Galerkin         15           15         1200
+     3         AZ         16           AZ        Jacobian         15           15         1200
+     3         AZ         16                Surf Galerkin         14           14         1120
+     3         AZ         16           AZ   Surf Jacobian         14           14         1120
+     3         AZ         17                       Source          1            2          160
+     3         AZ         17                     Galerkin         15           15         1200
+     3         AZ         17           AZ        Jacobian         15           15         1200
+     3         AZ         17                Surf Galerkin         14           14         1120
+     3         AZ         17           AZ   Surf Jacobian         14           14         1120
+     3         AZ         18                       Source          1            2          160
+     3         AZ         18                     Galerkin         15           15         1200
+     3         AZ         18           AZ        Jacobian         15           15         1200
+     3         AZ         18                Surf Galerkin         14           14         1120
+     3         AZ         18           AZ   Surf Jacobian         14           14         1120
+     3         AZ         19                       Source          1            2          160
+     3         AZ         19                     Galerkin         15           15         1200
+     3         AZ         19           AZ        Jacobian         15           15         1200
+     3         AZ         19                Surf Galerkin         14           14         1120
+     3         AZ         19           AZ   Surf Jacobian         14           14         1120
+     3         AZ         20                       Source          1            2          160
+     3         AZ         20                     Galerkin         15           15         1200
+     3         AZ         20           AZ        Jacobian         15           15         1200
+     3         AZ         20                Surf Galerkin         14           14         1120
+     3         AZ         20           AZ   Surf Jacobian         14           14         1120
+     3         AZ         21                       Source          1            2          160
+     3         AZ         21                     Galerkin         15           15         1200
+     3         AZ         21           AZ        Jacobian         15           15         1200
+     3         AZ         21                Surf Galerkin         14           14         1120
+     3         AZ         21           AZ   Surf Jacobian         14           14         1120
+     3         AZ         22                       Source          1            2          160
+     3         AZ         22                     Galerkin         15           15         1200
+     3         AZ         22           AZ        Jacobian         15           15         1200
+     3         AZ         22                Surf Galerkin         14           14         1120
+     3         AZ         22           AZ   Surf Jacobian         14           14         1120
+     3         AZ         23                       Source          1            2          160
+     3         AZ         23                     Galerkin         15           15         1200
+     3         AZ         23           AZ        Jacobian         15           15         1200
+     3         AZ         23                Surf Galerkin         14           14         1120
+     3         AZ         23           AZ   Surf Jacobian         14           14         1120
+     3         AZ         24                       Source          1            2          160
+     3         AZ         24                     Galerkin         15           15         1200
+     3         AZ         24           AZ        Jacobian         15           15         1200
+     3         AZ         24                Surf Galerkin         14           14         1120
+     3         AZ         24           AZ   Surf Jacobian         14           14         1120
+
+EQUATION 1 PARAMETER DEPENDENCIES:
+ MU0             MU              JX              MUU_SKIN        MUU_MUSCLE     
+ MUU_FAT         MUU_CANB        MUU_IN          MUU_OUT         MUU_DI         
+
+EQUATION 2 PARAMETER DEPENDENCIES:
+ MU0             MU              JY              MUU_SKIN        MUU_MUSCLE     
+ MUU_FAT         MUU_CANB        MUU_IN          MUU_OUT         MUU_DI         
+
+EQUATION 3 PARAMETER DEPENDENCIES:
+ MU0             MU              J0              JZ              MUU_SKIN       
+ MUU_MUSCLE      MUU_FAT         MUU_CANB        MUU_IN          MUU_OUT        
+ MUU_DI          SCALE           WIRE_RAD        COP_OUT         DI_S_D         
+ COP_IN          HOLE            CURRENT        
+
+BC 1  REGION 1 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 3 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 5 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 7 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 12 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 17 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 1  REGION 22 BC TIME DERIVATIVE
+|   AX.T  
+----------------------------------------
+
+BC 2  REGION 1 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 3 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 5 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 7 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 12 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 17 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 2  REGION 22 BC TIME DERIVATIVE
+|   AY.T  
+----------------------------------------
+
+BC 3  REGION 1 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 3 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 5 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 7 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 12 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 17 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BC 3  REGION 22 BC TIME DERIVATIVE
+|   AZ.T  
+----------------------------------------
+
+BOUNDARY CONDITION TAGS with associated BC INDEX
+BC TAG   1: val(1) val(2) val(3)
+
+BOUNDARY CONDITION FORMULAS [BCINDEX]
+BC INDEX 1 VAL(AX)
+|  0.00000
+----------------------------------------
+
+        REGIONS
+    1 |       1      3      5      7     12     17     22
+BC INDEX 2 VAL(AY)
+|  0.00000
+----------------------------------------
+
+        REGIONS
+    1 |       1      3      5      7     12     17     22
+BC INDEX 3 VAL(AZ)
+|  0.00000
+----------------------------------------
+
+        REGIONS
+    1 |       1      3      5      7     12     17     22
+
+--------------------------
+SUMMARIZE BOUNDARY CONDITIONS
+--------------------------
+    BC      DEFINES   COMPARTMENT     DEPENDS     FUNCTION     COMPLEXITY    MEMORY
+----------------------------------------------------------------------
+     1         AX            1                  Surf Galerkin          1         80
+     1         AX            1             AX   Surf Jacobian          1         80
+     1         AX            1             AY   Surf Jacobian          1         80
+     1         AX            1             AZ   Surf Jacobian          1         80
+     1         AX            2                  Surf Galerkin          1         80
+     1         AX            2             AX   Surf Jacobian          1         80
+     1         AX            2             AY   Surf Jacobian          1         80
+     1         AX            2             AZ   Surf Jacobian          1         80
+     1         AX            3                  Surf Galerkin          1         80
+     1         AX            3             AX   Surf Jacobian          1         80
+     1         AX            3             AY   Surf Jacobian          1         80
+     1         AX            3             AZ   Surf Jacobian          1         80
+     1         AX            4                  Surf Galerkin          1         80
+     1         AX            4             AX   Surf Jacobian          1         80
+     1         AX            4             AY   Surf Jacobian          1         80
+     1         AX            4             AZ   Surf Jacobian          1         80
+     1         AX            5                  Surf Galerkin          1         80
+     1         AX            5             AX   Surf Jacobian          1         80
+     1         AX            5             AY   Surf Jacobian          1         80
+     1         AX            5             AZ   Surf Jacobian          1         80
+     1         AX            6                  Surf Galerkin          1         80
+     1         AX            6             AX   Surf Jacobian          1         80
+     1         AX            6             AY   Surf Jacobian          1         80
+     1         AX            6             AZ   Surf Jacobian          1         80
+     1         AX            7                  Surf Galerkin          1         80
+     1         AX            7             AX   Surf Jacobian          1         80
+     1         AX            7             AY   Surf Jacobian          1         80
+     1         AX            7             AZ   Surf Jacobian          1         80
+     2         AY            1                  Surf Galerkin          1         80
+     2         AY            1             AX   Surf Jacobian          1         80
+     2         AY            1             AY   Surf Jacobian          1         80
+     2         AY            1             AZ   Surf Jacobian          1         80
+     2         AY            2                  Surf Galerkin          1         80
+     2         AY            2             AX   Surf Jacobian          1         80
+     2         AY            2             AY   Surf Jacobian          1         80
+     2         AY            2             AZ   Surf Jacobian          1         80
+     2         AY            3                  Surf Galerkin          1         80
+     2         AY            3             AX   Surf Jacobian          1         80
+     2         AY            3             AY   Surf Jacobian          1         80
+     2         AY            3             AZ   Surf Jacobian          1         80
+     2         AY            4                  Surf Galerkin          1         80
+     2         AY            4             AX   Surf Jacobian          1         80
+     2         AY            4             AY   Surf Jacobian          1         80
+     2         AY            4             AZ   Surf Jacobian          1         80
+     2         AY            5                  Surf Galerkin          1         80
+     2         AY            5             AX   Surf Jacobian          1         80
+     2         AY            5             AY   Surf Jacobian          1         80
+     2         AY            5             AZ   Surf Jacobian          1         80
+     2         AY            6                  Surf Galerkin          1         80
+     2         AY            6             AX   Surf Jacobian          1         80
+     2         AY            6             AY   Surf Jacobian          1         80
+     2         AY            6             AZ   Surf Jacobian          1         80
+     2         AY            7                  Surf Galerkin          1         80
+     2         AY            7             AX   Surf Jacobian          1         80
+     2         AY            7             AY   Surf Jacobian          1         80
+     2         AY            7             AZ   Surf Jacobian          1         80
+     3         AZ            1                  Surf Galerkin          1         80
+     3         AZ            1             AX   Surf Jacobian          1         80
+     3         AZ            1             AY   Surf Jacobian          1         80
+     3         AZ            1             AZ   Surf Jacobian          1         80
+     3         AZ            2                  Surf Galerkin          1         80
+     3         AZ            2             AX   Surf Jacobian          1         80
+     3         AZ            2             AY   Surf Jacobian          1         80
+     3         AZ            2             AZ   Surf Jacobian          1         80
+     3         AZ            3                  Surf Galerkin          1         80
+     3         AZ            3             AX   Surf Jacobian          1         80
+     3         AZ            3             AY   Surf Jacobian          1         80
+     3         AZ            3             AZ   Surf Jacobian          1         80
+     3         AZ            4                  Surf Galerkin          1         80
+     3         AZ            4             AX   Surf Jacobian          1         80
+     3         AZ            4             AY   Surf Jacobian          1         80
+     3         AZ            4             AZ   Surf Jacobian          1         80
+     3         AZ            5                  Surf Galerkin          1         80
+     3         AZ            5             AX   Surf Jacobian          1         80
+     3         AZ            5             AY   Surf Jacobian          1         80
+     3         AZ            5             AZ   Surf Jacobian          1         80
+     3         AZ            6                  Surf Galerkin          1         80
+     3         AZ            6             AX   Surf Jacobian          1         80
+     3         AZ            6             AY   Surf Jacobian          1         80
+     3         AZ            6             AZ   Surf Jacobian          1         80
+     3         AZ            7                  Surf Galerkin          1         80
+     3         AZ            7             AX   Surf Jacobian          1         80
+     3         AZ            7             AY   Surf Jacobian          1         80
+     3         AZ            7             AZ   Surf Jacobian          1         80
+
+-------------------------------
+SUMMARIZE PLOT EQUATIONS
+-------------------------------
+                                     BASE        CSE
+   PLOT    ARGUMENT COMPARTMENT  COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------
+     1          1          1          1          1           80
+     1          1          2          1          1           80
+     1          1          3          1          1           80
+     1          1          4          1          1           80
+     1          1          5          1          1           80
+     1          1          6          1          1           80
+     1          1          7          1          1           80
+     1          1          8          1          1           80
+     1          1          9          1          1           80
+     1          1         10          1          1           80
+     1          1         11          1          1           80
+     1          1         12          1          1           80
+     1          1         13          1          1           80
+     1          1         14          1          1           80
+     1          1         15          1          1           80
+     1          1         16          1          1           80
+     1          1         17          1          1           80
+     1          1         18          1          1           80
+     1          1         19          1          1           80
+     1          1         20          1          1           80
+     1          1         21          1          1           80
+     1          1         22          1          1           80
+     1          1         23          1          1           80
+     1          1         24          1          1           80
+     1          2          1          1          1           80
+     1          2          2          1          1           80
+     1          2          3          1          1           80
+     1          2          4          1          1           80
+     1          2          5          1          1           80
+     1          2          6          1          1           80
+     1          2          7          1          1           80
+     1          2          8          1          1           80
+     1          2          9          1          1           80
+     1          2         10          1          1           80
+     1          2         11          1          1           80
+     1          2         12          1          1           80
+     1          2         13          1          1           80
+     1          2         14          1          1           80
+     1          2         15          1          1           80
+     1          2         16          1          1           80
+     1          2         17          1          1           80
+     1          2         18          1          1           80
+     1          2         19          1          1           80
+     1          2         20          1          1           80
+     1          2         21          1          1           80
+     1          2         22          1          1           80
+     1          2         23          1          1           80
+     1          2         24          1          1           80
+     2          1          1          1          1           80
+     2          1          2          1          1           80
+     2          1          3          1          1           80
+     2          1          4          1          1           80
+     2          1          5          1          1           80
+     2          1          6          1          1           80
+     2          1          7          1          1           80
+     2          1          8          1          1           80
+     2          1          9          4          4          320
+     2          1         10          1          1           80
+     2          1         11          4          4          320
+     2          1         12          1          1           80
+     2          1         13          1          1           80
+     2          1         14          4          4          320
+     2          1         15          1          1           80
+     2          1         16          4          4          320
+     2          1         17          1          1           80
+     2          1         18          1          1           80
+     2          1         19          4          4          320
+     2          1         20          1          1           80
+     2          1         21          4          4          320
+     2          1         22          1          1           80
+     2          1         23          4          4          320
+     2          1         24          1          1           80
+     3          1          1         10         10          800
+     3          1          2         10         10          800
+     3          1          3         10         10          800
+     3          1          4         10         10          800
+     3          1          5         10         10          800
+     3          1          6         10         10          800
+     3          1          7         10         10          800
+     3          1          8         10         10          800
+     3          1          9         10         10          800
+     3          1         10         10         10          800
+     3          1         11         10         10          800
+     3          1         12         10         10          800
+     3          1         13         10         10          800
+     3          1         14         10         10          800
+     3          1         15         10         10          800
+     3          1         16         10         10          800
+     3          1         17         10         10          800
+     3          1         18         10         10          800
+     3          1         19         10         10          800
+     3          1         20         10         10          800
+     3          1         21         10         10          800
+     3          1         22         10         10          800
+     3          1         23         10         10          800
+     3          1         24         10         10          800
+
+==UNUSED== PARAMETER DEFINITIONS:
+ RMU             NUDGE           WIRE_LENGTH     AR              EPS            
+ EPS0            EPS_SKIN        EPS_MUSCLE      EPS_FAT         MUU_CB         
+ EPS_CB          EPS_CANB        EPS_IN          EPS_OUT         EPS_DI         
+ BMAG            H               HMAG            CURLX           CURLY          
+ CURLZ          
+
+Uorder=3
+ AX order=3
+ AY order=3
+ AZ order=3
+Orthomin/BInv FINAL ITERATION 341 of 1424 RNORM=1.16625e-007 XNORM=1.55657e-005 Flag=0 MS=203078
+Orthomin/BInv FINAL ITERATION 447 of 1424 RNORM=1.65298e-009 XNORM=1.94667e-007 Flag=0 MS=254062
+RMS Spatial Errors   0.000000  0.000000  0.005581
+DO_NEXTSTAGE pde 00000000B67E2020  MAXSTAGE=0

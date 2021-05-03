@@ -8,8 +8,8 @@ variables
     Az
  
 definitions
-   Lx =0.05
-   Ly = 0.05
+   Lx = 0.005
+   Ly = 0.005
     mu0 = pi *4e-7            { the permeability }
     mu 
     J0 = 0
@@ -31,28 +31,36 @@ definitions
     eps0=8.854e-12 							    ! The dielectric permittivity of free space.
     
     muu_skin = pi *4e-7 
-    eps_skin = eps0
+    eps_skin = 8.58e2
+    
     muu_muscle=pi *4e-7 
-    eps_muscle = eps0
+    eps_muscle = 8.26e2
+    
     muu_fat = pi *4e-7 
-    eps_fat = eps0
+    eps_fat = 4.46e2
+    
     muu_cb =  pi *4e-7 
-    eps_cb = eps0
+    eps_cb = 1.06e2
+    
     muu_canb =  pi *4e-7
-    eps_canb = eps0
+    eps_canb = 1.85e2
+    
     muu_in = pi *4e-7
     eps_in = 1
+    
     muu_out = pi *4e-7 
     eps_out = 1
+    
     muu_di = pi *4e-7 
-    eps_di = eps0
+    eps_di = 2.1
     scale = 1
 
-     wire_rad = (8.44e-3) * scale
-     cop_out = (6.3e-3 - 4.7e-3)* scale                                                               !thickness of outside component
-     di_s_d = (4.7e-3 - 0.7e-3) * scale                                                                 !thickness of dielectric
-     cop_in = (1.8e-3) * scale
-     hole = wire_rad - cop_in - di_s_d -cop_out
+    
+    wire_rad = (1e-3) * scale
+    cop_out = (1e-3 - 0.75e-3)* scale                                                               !thickness of outside component
+    di_s_d = (0.75e-3 - 0.65e-3) * scale                                                                 !thickness of dielectric
+    cop_in = (0.65e-3 -0.5e-3) * scale
+    hole = wire_rad - cop_in - di_s_d -cop_out
   
     current = 2.14
     B = curl(Ax, Ay, Az)                                                                                         { magnetic flux density }
@@ -212,4 +220,5 @@ GRID(y,z) ON x=0
      VECTOR(J) ON x=0
      vector(B) ON z = sth + fth + mth + dcb - dcanb-pen_len
      !ELEVATION(v) FROM (0,-1,0) to (0,1,0) { note 3D coordinates }
+     
 END

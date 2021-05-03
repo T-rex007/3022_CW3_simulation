@@ -1,10 +1,11 @@
 FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017
 (Times listed are wall-clock times, not charged CPU).
 
-START C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\testMagno.pde  05:53:39 5/3/21
+START C:\Users\user\Documents\uwi\3022\coursework3\3022_CW3_simulation\model1\testMagno.pde  11:52:11 5/3/21
 Using 1 Threads  Cubic Curvature 
- +00:00:02| Mesh Import Complete
- +00:00:43| (1)Linear Step 1 Error= 7.287e-6 Orthomin/ILU(45)
- +00:01:02| (1)Linear Step 2 Error= 5.39e-10 Orthomin/ILU(52)
- +00:01:02| GRID 1 Nodes=12030 Cells=67390 DOF=308378 RMS ERR= 5.189e-5 MAX ERR= 1.290e-4 MEM=1400039
- +00:01:29| --DONE-- 05:55:08 5/3/21
+ +00:02:27| Mesh Generation Complete
+ +00:02:29| Mesh dump written to C:\Users\user\Documents\uwi\3022\coursework3\3022_CW3_simulation\model1\testMagno_output/testMagno_initialmesh.xfr
+ +00:07:21| (1)Linear Step 1 Error= 1.557e-5 Orthomin/BInv(341)
+ +00:11:37| (1)Linear Step 2 Error= 1.947e-7 Orthomin/BInv(447)
+ +00:11:37| GRID 1 Nodes=25998 Cells=148951 DOF=676703 RMS ERR= 2.201e-5 MAX ERR= 6.794e-5 MEM=2999661
+ +00:13:23| --DONE-- 12:05:34 5/3/21

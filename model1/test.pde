@@ -93,7 +93,7 @@ LIMITED REGION 2 'tissue' { the embedded blob }
      eps = eps_canb*eps0
         
      LAYER 2 
-     mu = muu_canb
+     mu = muu_cb
      eps = eps_cb*eps0
         
      LAYER 3 

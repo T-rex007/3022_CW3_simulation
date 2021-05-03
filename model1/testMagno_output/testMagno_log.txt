@@ -1,0 +1,8 @@
+FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017
+(Times listed are wall-clock times, not charged CPU).
+
+START C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\testMagno.pde  03:31:30 5/3/21
+Using 1 Threads  Cubic Curvature 
+ +00:00:23| Mesh Generation Complete
+ +00:00:23| Mesh dump written to C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\testMagno_output/testMagno_initialmesh.xfr
+ +00:00:23| ***** Line 67 ERROR: Vector Argument Required

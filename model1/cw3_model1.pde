@@ -55,7 +55,6 @@
   rotation lies along the X-axis. We bound the coil by a distant spherical
   surface at which we specify a boundary condition (n X H) = 0.
   At the axis, we use a Dirichlet boundary condition A=0.
- 
 }
  
 title 'AXI-SYMMETRIC MAGNETIC FIELD'
@@ -102,7 +101,6 @@ definitions
      hole = wire_rad - cop_in - di_s_d -cop_out
   
     current = 2.14
-    current_density = current/(pi*wire_rad^2)
     Bz = dr(r*Aphi)/r                                                                                       ! The Z-component of the Flux density
     Br = dz(Aphi)                                                                                            ! The R-component of the Flux density Note: the phi-component
     Bmag = sqrt(Bz^2 + Br^2)                                                                         ! The Magnitude of the flux density
@@ -122,10 +120,10 @@ boundaries
     region 1 'Domain'
      mu = mu0
        START 'ring' ( -Lx , 0)
-           line to (Lx,0)
-           line to (Lx, Ly)
-           line to (-Lx, Ly)
-           line to close 
+      value(Aphi) = 0       { specify A=0 along axis }
+        line to (Lx,0)
+      natural(Aphi) = 0     { H<dot>n = 0 on distant sphere }
+        arc(center=0,0) angle 180 to close         !forms semicircle on Z axis with radius of 0.1 to fully encapsulate the ring
     
     region 2 'Skin'
     	mu = muu_skin
@@ -152,17 +150,17 @@ boundaries
         start (sth + fth + mth +dcb, ar)
         line to (sth + fth + mth + dcb + dcanb,  ar) to (sth + fth + mth + dcb + dcanb,  0) to (sth + fth + mth + dcb, 0) to close
         
-    region 7 'Hole'
+    {region 7 'Hole'
         mu = mu0
        START 'ring' (pen_len , hole)
            line to (pen_len, 0)
            line to (-wire_length , 0)
            line to (-wire_length ,  hole)
-           line to close 
+           line to close} 
            
     region 8 'Terminal'
         mu = muu_in
-        J = current_density
+        J = current/(pi*((hole + cop_in)^2 - hole^2))
        START 'ring' (pen_len , hole + cop_in)
            line to (pen_len, hole)
            line to (-wire_length , hole)
@@ -179,7 +177,7 @@ boundaries
            
     region 10 'Ground'
         mu = muu_out
-        J = -current_density
+        J = -current/(pi*((hole + cop_in + cop_out)^2 - (hole + cop_in)^2))
        START 'ring' (pen_len, wire_rad)
            line to (pen_len, wire_rad - cop_out)
            line to (0 , wire_rad - cop_out)
@@ -203,6 +201,7 @@ plots
     vector(H) as 'Vector Plot of magnetic field intensity H (A/m)' PNG
     vector(B) as 'Vector plot of the Manetic Flux Density B (T)' PNG
     vector(Aphi)  as 'VECTOR PLOT OF MAGNETIC POTENTIAL' PNG
+    vector(J) zoom(0, 0, pen_len, wire_rad)
     contour(Aphi)  as 'MAGNETIC POTENTIAL' PNG
     contour(Aphi) zoom(-2,0,4,4)  as 'MAGNETIC POTENTIAL'
     

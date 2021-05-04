@@ -30,6 +30,7 @@ Eps0 = 8.854e-12 { Farads/M }
 Eps0mm = 0.001*Eps0 { Farads/mm } {fixed 1/10/03 }
 W = integral(0.5*K*eps0mm*grad(V)^2) { Stored Energy }
 C = 1.0e6*2*W/(V1-V0)^2 { Capacitance in microFarads }
+ Ex=-dx(v)  Ey=-dy(v)  Ez=-dz(v)
 
 EQUATIONS
 DIV(K*GRAD(V)) = 0
@@ -80,4 +81,7 @@ GRID(X,Z) ON Y=2.5
 CONTOUR(1/K) ON Y=2.5 PAINTED as "Material"
 SUMMARY
   report(W)
+  contour(vector(Ex, Ey, Ez)) on x = 0
+ ! report(magnitude(grad(v)))
+  report(integral(v,"Dielectric" ))
 END

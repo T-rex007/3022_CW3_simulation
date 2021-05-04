@@ -1,0 +1,801 @@
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\user\Documents\uwi\3022\coursework3\3022_CW3_simulation\model1\sanit.pde 15:27:57 5/3/21
+================================================================
+    1| { 3D_CAPACITOR.PDE }
+    2| {
+    3| This problem is an extension of "3D_Extrusion_Spec.PDE", and shows
+    4| a capacitor formed by two metal strips of different size separated
+    5| by a sheet of dielectric.
+    6| }
+    7| 
+    8| TITLE '3D Capacitor'
+    9| 
+   10| COORDINATES
+   11| CARTESIAN3
+   12| 
+   13| SELECT
+   14| alias(x) = "X(mm)"
+   15| alias(y) = "Y(mm)"
+   16| alias(z) = "Z(mm)"
+   17| PAINTED
+   18| 
+   19| VARIABLES
+   20| V
+   21| 
+   22| DEFINITIONS
+   23| Kdiel= 6
+   24| Kmetal=1e6
+   25| Kair=1
+   26| K = Kair { default to Kair }
+   27| V0 = 0
+   28| V1 = 1
+   29| Eps0 = 8.854e-12 { Farads/M }
+   30| Eps0mm = 0.001*Eps0 { Farads/mm } {fixed 1/10/03 }
+   31| W = integral(0.5*K*eps0mm*grad(V)^2) { Stored Energy }
+   32| C = 1.0e6*2*W/(V1-V0)^2 { Capacitance in microFarads }
+   33| 
+   34| EQUATIONS
+   35| DIV(K*GRAD(V)) = 0
+   36| 
+   37| EXTRUSION
+   38| SURFACE "Bottom" Z=0
+   39| LAYER "Bottom Air"
+   40| SURFACE "Bottom Air - Metal" Z=0.9
+   41| LAYER "Bottom Metal"
+   42| SURFACE "Bottom Metal - Dielectric" Z=1
+   43| LAYER "Dielectric"
+   44| SURFACE "Top Metal - Dielectric" Z=2
+   45| LAYER "Top Metal"
+   46| SURFACE "Top Metal - Air" Z=2.1
+   47| LAYER "Top Air"
+   48| SURFACE "Top" Z=3
+   49| 
+   50| BOUNDARIES
+   51| SURFACE "Bottom" NATURAL(V)=0 { Insulators top and bottom }
+   52| SURFACE "Top" NATURAL(V)=0
+   53| REGION 1 { this is the outer boundary of the system }
+   54| LAYER "dielectric" K = Kdiel { all other layers default to Kair }
+   55| START(0,0)
+   56| LINE TO (5,0) TO (5,5) TO(0,5) to close
+   57| LIMITED REGION 2 { the larger bottom plate }
+   58| LAYER "Bottom Metal" K = Kmetal
+   59| START(1,0)
+   60| LAYER "Bottom Metal" VALUE(V)=V0
+   61| LINE TO (4,0)
+   62| LAYER "Bottom Metal" NATURAL(V)=0
+   63| Line TO (4,4) TO (1,4) to close
+   64| LIMITED REGION 3 { the smaller top plate}
+   65| LAYER "Top Metal" K = Kmetal
+   66| START(2,1)
+   67| LINE TO (3,1) TO (3,5)
+   68| LAYER "Top Metal" VALUE(V)=V1
+   69| LINE TO (2,5)
+   70| LAYER "Top Metal" NATURAL(V)=0
+   71| LINE to close
+   72| 
+   73| MONITORS
+   74| CONTOUR(V) ON Y=2.5
+   75| PLOTS
+   76| CONTOUR(V) ON X=2.5 REPORT(C) as "Capacitance(uF)"
+   77| CONTOUR(V) ON Y=2.5 REPORT(C) as "Capacitance(uF)"
+   78| CONTOUR(V) ON Z=1.5 REPORT(C) as "Capacitance(uF)"
+   79| GRID(X,Z) ON Y=2.5
+   80| CONTOUR(1/K) ON Y=2.5 PAINTED as "Material"
+   81| SUMMARY
+   82|   report(magnitude(grad(v)))
+   83| END
+LOG Threads=1 Order=3 Speed=1 Stability=0
+Uorder=3
+ V order=3
+MESH GENERATION LAYER 1 REGION 1
+MESH GENERATION LAYER 2 REGION 1
+MESH GENERATION LAYER 2 REGION 2
+MESH GENERATION LAYER 3 REGION 1
+MESH GENERATION LAYER 4 REGION 1
+MESH GENERATION LAYER 4 REGION 3
+MESH GENERATION LAYER 5 REGION 1
+
+
+ BDID LINKUPS ACROSS PINCHED LAYERS COULD BE REPLACED BY COMMON SIDE REFERENCES (DOMAINSPEC4465)
+3D MESH GENERATION TIME 2445 MS
+
+SUMMARIZE 10 PARAMETERS (NO COMMON SUBEXPRESSION ELIMINATION)
+   Param         Compartment       Complexity     Memory
+--------------------------------------------------------------
+          KDIEL      0                    1         80
+         KMETAL      0                    1         80
+           KAIR      0                    1         80
+              K      1                    1         80
+              K      2                    1         80
+              K      3                    1         80
+              K      4                    1         80
+              K      5                    1         80
+              K      6                    1         80
+              K      7                    1         80
+             V0      0                    1         80
+             V1      0                    1         80
+           EPS0      0                    1         80
+         EPS0MM      0                    1         80
+              W      0                    1         80
+              C      0                    5        400
+
+--------------------------
+SUMMARIZE EQUATIONS
+--------------------------
+           DEFINES               DEPENDS                    BASE         CSE
+ EQUATION    VAR    COMPARTMENT    VAR       FUNCTION     COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------------------------------
+     1          V          1                       Source          1            2          160
+     1          V          1                     Galerkin          9            9          720
+     1          V          1            V        Jacobian          9            9          720
+     1          V          1                Surf Galerkin          8            8          640
+     1          V          1            V   Surf Jacobian          8            8          640
+     1          V          2                       Source          1            2          160
+     1          V          2                     Galerkin          9            9          720
+     1          V          2            V        Jacobian          9            9          720
+     1          V          2                Surf Galerkin          8            8          640
+     1          V          2            V   Surf Jacobian          8            8          640
+     1          V          3                       Source          1            2          160
+     1          V          3                     Galerkin         15           15         1200
+     1          V          3            V        Jacobian         15           15         1200
+     1          V          3                Surf Galerkin         14           14         1120
+     1          V          3            V   Surf Jacobian         14           14         1120
+     1          V          4                       Source          1            2          160
+     1          V          4                     Galerkin         15           15         1200
+     1          V          4            V        Jacobian         15           15         1200
+     1          V          4                Surf Galerkin         14           14         1120
+     1          V          4            V   Surf Jacobian         14           14         1120
+     1          V          5                       Source          1            2          160
+     1          V          5                     Galerkin          9            9          720
+     1          V          5            V        Jacobian          9            9          720
+     1          V          5                Surf Galerkin          8            8          640
+     1          V          5            V   Surf Jacobian          8            8          640
+     1          V          6                       Source          1            2          160
+     1          V          6                     Galerkin         15           15         1200
+     1          V          6            V        Jacobian         15           15         1200
+     1          V          6                Surf Galerkin         14           14         1120
+     1          V          6            V   Surf Jacobian         14           14         1120
+     1          V          7                       Source          1            2          160
+     1          V          7                     Galerkin          9            9          720
+     1          V          7            V        Jacobian          9            9          720
+     1          V          7                Surf Galerkin          8            8          640
+     1          V          7            V   Surf Jacobian          8            8          640
+
+EQUATION 1 PARAMETER DEPENDENCIES:
+ KDIEL           KMETAL          KAIR            K              
+
+BC 1  REGION 1 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 2 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 3 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 4 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 5 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 6 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 7 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 2  REGION 1 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 2  REGION 2 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 2  REGION 3 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 2  REGION 4 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 3  REGION 4 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 3  REGION 5 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 3  REGION 6 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 3  REGION 7 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BOUNDARY CONDITION TAGS with associated BC INDEX
+BC TAG   1: nat(1)
+BC TAG   2: val(2)
+BC TAG   3: val(3)
+
+BOUNDARY CONDITION FORMULAS [BCINDEX]
+BC INDEX 1 NAT(V)
+|  0.00000
+----------------------------------------
+
+        REGIONS
+    1 |       1      2      3      4      5      6      7
+BC INDEX 2 VAL(V)
+|     V0  
+----------------------------------------
+
+        REGIONS
+    1 |       1      2      3      4
+BC INDEX 3 VAL(V)
+|     V1  
+----------------------------------------
+
+        REGIONS
+    1 |       4      5      6      7
+
+--------------------------
+SUMMARIZE BOUNDARY CONDITIONS
+--------------------------
+    BC      DEFINES   COMPARTMENT     DEPENDS     FUNCTION     COMPLEXITY    MEMORY
+----------------------------------------------------------------------
+     1          V            1                  Surf Galerkin          1         80
+     1          V            1              V   Surf Jacobian          1         80
+     1          V            2                  Surf Galerkin          1         80
+     1          V            2              V   Surf Jacobian          1         80
+     1          V            3                  Surf Galerkin          1         80
+     1          V            3              V   Surf Jacobian          1         80
+     1          V            4                  Surf Galerkin          1         80
+     1          V            4              V   Surf Jacobian          1         80
+     1          V            5                  Surf Galerkin          1         80
+     1          V            5              V   Surf Jacobian          1         80
+     1          V            6                  Surf Galerkin          1         80
+     1          V            6              V   Surf Jacobian          1         80
+     1          V            7                  Surf Galerkin          1         80
+     1          V            7              V   Surf Jacobian          1         80
+     2          V            1                  Surf Galerkin          1         80
+     2          V            1              V   Surf Jacobian          1         80
+     2          V            2                  Surf Galerkin          1         80
+     2          V            2              V   Surf Jacobian          1         80
+     2          V            3                  Surf Galerkin          1         80
+     2          V            3              V   Surf Jacobian          1         80
+     2          V            4                  Surf Galerkin          1         80
+     2          V            4              V   Surf Jacobian          1         80
+     3          V            1                  Surf Galerkin          3        240
+     3          V            1              V   Surf Jacobian          1         80
+     3          V            2                  Surf Galerkin          3        240
+     3          V            2              V   Surf Jacobian          1         80
+     3          V            3                  Surf Galerkin          3        240
+     3          V            3              V   Surf Jacobian          1         80
+     3          V            4                  Surf Galerkin          3        240
+     3          V            4              V   Surf Jacobian          1         80
+
+--------------------------------
+SUMMARIZE FITS AND INTEGRALS
+---------------------------------
+                             REGION/       BASE        CSE
+    FIT         KIND       COMPARTMENT  COMPLEXITY  COMPLEXITY  MEMORY  DEPENDENCY
+-----------------------------------------------------------------------------------------
+     1      Volume Integral       1          10         10        800    V
+     1      Volume Integral       2          10         10        800    V
+     1      Volume Integral       3          10         10        800    V
+     1      Volume Integral       4          10         10        800    V
+     1      Volume Integral       5          10         10        800    V
+     1      Volume Integral       6          10         10        800    V
+     1      Volume Integral       7          10         10        800    V
+
+-------------------------------
+SUMMARIZE PLOT EQUATIONS
+-------------------------------
+                                     BASE        CSE
+   PLOT    ARGUMENT COMPARTMENT  COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------
+     1          1          1          1          1           80
+     1          1          2          1          1           80
+     1          1          3          1          1           80
+     1          1          4          1          1           80
+     1          1          5          1          1           80
+     1          1          6          1          1           80
+     1          1          7          1          1           80
+     2          1          1          1          1           80
+     2          1          2          1          1           80
+     2          1          3          1          1           80
+     2          1          4          1          1           80
+     2          1          5          1          1           80
+     2          1          6          1          1           80
+     2          1          7          1          1           80
+     3          1          1          1          1           80
+     3          1          2          1          1           80
+     3          1          3          1          1           80
+     3          1          4          1          1           80
+     3          1          5          1          1           80
+     3          1          6          1          1           80
+     3          1          7          1          1           80
+     4          1          1          1          1           80
+     4          1          2          1          1           80
+     4          1          3          1          1           80
+     4          1          4          1          1           80
+     4          1          5          1          1           80
+     4          1          6          1          1           80
+     4          1          7          1          1           80
+     5          1          1          1          1           80
+     5          1          2          1          1           80
+     5          1          3          1          1           80
+     5          1          4          1          1           80
+     5          1          5          1          1           80
+     5          1          6          1          1           80
+     5          1          7          1          1           80
+     5          2          1          1          1           80
+     5          2          2          1          1           80
+     5          2          3          1          1           80
+     5          2          4          1          1           80
+     5          2          5          1          1           80
+     5          2          6          1          1           80
+     5          2          7          1          1           80
+     6          1          1          1          1           80
+     6          1          2          1          1           80
+     6          1          3          1          1           80
+     6          1          4          1          1           80
+     6          1          5          1          1           80
+     6          1          6          1          1           80
+     6          1          7          1          1           80
+
+==UNUSED== PARAMETER DEFINITIONS:
+ EPS0            EPS0MM         
+
+Uorder=3
+ V order=3
+Lanczos/DInv FINAL ITERATION 15 of 1000 RNORM=0 XNORM=1.18869e-016 Flag=0 MS=0
+Orthomin/DInv FINAL ITERATION 152 of 1000 RNORM=0.0103484 XNORM=284.428 Flag=0 MS=830
+Orthomin/DInv FINAL ITERATION 192 of 1000 RNORM=1.47842e-006 XNORM=0.256614 Flag=0 MS=1077
+Orthomin/DInv FINAL ITERATION 187 of 1000 RNORM=3.95969e-010 XNORM=5.00151e-005 Flag=0 MS=1006
+Orthomin/DInv FINAL ITERATION 176 of 1000 RNORM=3.00478e-013 XNORM=1.398e-008 Flag=0 MS=987
+RMS Spatial Errors   0.067823
+-----Called from doplot::summary_plot
+-----Called from doplot::do_plot
+-----Called from doplot::show_plots
+-----Called from control::do_finalplots
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from PageStack::newfile
+-----Called from flexpde::OnRun
+-----Called from fpdemain
+Table 00000000033592D0
+A Scalar Evaluation has encountered
+a Field value with no Location Specified
+|    V.X  
+----------------------------------------
+
+In Context
+|    sqrt |       + |     SQR |    V.Z  
+                    |       + |     SQR |    V.Y  
+                              |     SQR |    V.X  
+----------------------------------------
+Parse_Error
+|    sqrt |       + |     SQR |    V.Z  
+                    |       + |     SQR |    V.Y  
+                              |     SQR |    V.X  
+----------------------------------------
+Parse_Error at Line 82 Cols 25-25
+ in file C:\Users\user\Documents\uwi\3022\coursework3\3022_CW3_simulation\model1\sanit.pde
+A Scalar Evaluation has encountered
+a Field value with no Location Specified
+-----Called from doplot::summary_plot
+-----Called from doplot::do_plot
+-----Called from doplot::show_plots
+-----Called from control::do_finalplots
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from PageStack::newfile
+-----Called from flexpde::OnRun
+-----Called from fpdemain
+
+Parse_Error Catches RTException stop_parse(100,00000000267F56E0,000000003B4DAEC0)
+errmsg: A Scalar Evaluation has encountered
+a Field value with no Location Specified
+Trace:
+-----Called from doplot::summary_plot
+-----Called from doplot::do_plot
+-----Called from doplot::show_plots
+-----Called from control::do_finalplots
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from PageStack::newfile
+-----Called from flexpde::OnRun
+-----Called from fpdemain
+
+PDEThread Catches RTException stop_parse(100,00000000267F56E0,000000003B4DAEC0)
+errmsg: A Scalar Evaluation has encountered
+a Field value with no Location Specified
+Trace:
+-----Called from doplot::summary_plot
+-----Called from doplot::do_plot
+-----Called from doplot::show_plots
+-----Called from control::do_finalplots
+-----Called from PDEThread::run
+-----Called from PageStack::GUIcreatejob
+-----Called from PageStack::newfile
+-----Called from flexpde::OnRun
+-----Called from fpdemain
+
+
+================================================================
+===  FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017  Copyright © 1996-2017 PDE Solutions Inc.
+===  C:\Users\user\Documents\uwi\3022\coursework3\3022_CW3_simulation\model1\sanit.pde 15:28:43 5/3/21
+================================================================
+    1| { 3D_CAPACITOR.PDE }
+    2| {
+    3| This problem is an extension of "3D_Extrusion_Spec.PDE", and shows
+    4| a capacitor formed by two metal strips of different size separated
+    5| by a sheet of dielectric.
+    6| }
+    7| 
+    8| TITLE '3D Capacitor'
+    9| 
+   10| COORDINATES
+   11| CARTESIAN3
+   12| 
+   13| SELECT
+   14| alias(x) = "X(mm)"
+   15| alias(y) = "Y(mm)"
+   16| alias(z) = "Z(mm)"
+   17| PAINTED
+   18| 
+   19| VARIABLES
+   20| V
+   21| 
+   22| DEFINITIONS
+   23| Kdiel= 6
+   24| Kmetal=1e6
+   25| Kair=1
+   26| K = Kair { default to Kair }
+   27| V0 = 0
+   28| V1 = 1
+   29| Eps0 = 8.854e-12 { Farads/M }
+   30| Eps0mm = 0.001*Eps0 { Farads/mm } {fixed 1/10/03 }
+   31| W = integral(0.5*K*eps0mm*grad(V)^2) { Stored Energy }
+   32| C = 1.0e6*2*W/(V1-V0)^2 { Capacitance in microFarads }
+   33| 
+   34| EQUATIONS
+   35| DIV(K*GRAD(V)) = 0
+   36| 
+   37| EXTRUSION
+   38| SURFACE "Bottom" Z=0
+   39| LAYER "Bottom Air"
+   40| SURFACE "Bottom Air - Metal" Z=0.9
+   41| LAYER "Bottom Metal"
+   42| SURFACE "Bottom Metal - Dielectric" Z=1
+   43| LAYER "Dielectric"
+   44| SURFACE "Top Metal - Dielectric" Z=2
+   45| LAYER "Top Metal"
+   46| SURFACE "Top Metal - Air" Z=2.1
+   47| LAYER "Top Air"
+   48| SURFACE "Top" Z=3
+   49| 
+   50| BOUNDARIES
+   51| SURFACE "Bottom" NATURAL(V)=0 { Insulators top and bottom }
+   52| SURFACE "Top" NATURAL(V)=0
+   53| REGION 1 { this is the outer boundary of the system }
+   54| LAYER "dielectric" K = Kdiel { all other layers default to Kair }
+   55| START(0,0)
+   56| LINE TO (5,0) TO (5,5) TO(0,5) to close
+   57| LIMITED REGION 2 { the larger bottom plate }
+   58| LAYER "Bottom Metal" K = Kmetal
+   59| START(1,0)
+   60| LAYER "Bottom Metal" VALUE(V)=V0
+   61| LINE TO (4,0)
+   62| LAYER "Bottom Metal" NATURAL(V)=0
+   63| Line TO (4,4) TO (1,4) to close
+   64| LIMITED REGION 3 { the smaller top plate}
+   65| LAYER "Top Metal" K = Kmetal
+   66| START(2,1)
+   67| LINE TO (3,1) TO (3,5)
+   68| LAYER "Top Metal" VALUE(V)=V1
+   69| LINE TO (2,5)
+   70| LAYER "Top Metal" NATURAL(V)=0
+   71| LINE to close
+   72| 
+   73| MONITORS
+   74| CONTOUR(V) ON Y=2.5
+   75| PLOTS
+   76| CONTOUR(V) ON X=2.5 REPORT(C) as "Capacitance(uF)"
+   77| CONTOUR(V) ON Y=2.5 REPORT(C) as "Capacitance(uF)"
+   78| CONTOUR(V) ON Z=1.5 REPORT(C) as "Capacitance(uF)"
+   79| GRID(X,Z) ON Y=2.5
+   80| CONTOUR(1/K) ON Y=2.5 PAINTED as "Material"
+   81| SUMMARY
+   82|   report(W)
+   83| END
+LOG Threads=1 Order=3 Speed=1 Stability=0
+Uorder=3
+ V order=3
+IMPORTMESH(0) NDIM=3 NB=20 NAB=4 NODES=1350 CELLS=6146 SIDES=12836 LEGS=8039 imaging=0 time(0)=0
+Import Mesh Time=78 ms
+
+3D MESH GENERATION TIME 248 MS
+
+SUMMARIZE 10 PARAMETERS (NO COMMON SUBEXPRESSION ELIMINATION)
+   Param         Compartment       Complexity     Memory
+--------------------------------------------------------------
+          KDIEL      0                    1         80
+         KMETAL      0                    1         80
+           KAIR      0                    1         80
+              K      1                    1         80
+              K      2                    1         80
+              K      3                    1         80
+              K      4                    1         80
+              K      5                    1         80
+              K      6                    1         80
+              K      7                    1         80
+             V0      0                    1         80
+             V1      0                    1         80
+           EPS0      0                    1         80
+         EPS0MM      0                    1         80
+              W      0                    1         80
+              C      0                    5        400
+
+--------------------------
+SUMMARIZE EQUATIONS
+--------------------------
+           DEFINES               DEPENDS                    BASE         CSE
+ EQUATION    VAR    COMPARTMENT    VAR       FUNCTION     COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------------------------------
+     1          V          1                       Source          1            2          160
+     1          V          1                     Galerkin          9            9          720
+     1          V          1            V        Jacobian          9            9          720
+     1          V          1                Surf Galerkin          8            8          640
+     1          V          1            V   Surf Jacobian          8            8          640
+     1          V          2                       Source          1            2          160
+     1          V          2                     Galerkin          9            9          720
+     1          V          2            V        Jacobian          9            9          720
+     1          V          2                Surf Galerkin          8            8          640
+     1          V          2            V   Surf Jacobian          8            8          640
+     1          V          3                       Source          1            2          160
+     1          V          3                     Galerkin         15           15         1200
+     1          V          3            V        Jacobian         15           15         1200
+     1          V          3                Surf Galerkin         14           14         1120
+     1          V          3            V   Surf Jacobian         14           14         1120
+     1          V          4                       Source          1            2          160
+     1          V          4                     Galerkin         15           15         1200
+     1          V          4            V        Jacobian         15           15         1200
+     1          V          4                Surf Galerkin         14           14         1120
+     1          V          4            V   Surf Jacobian         14           14         1120
+     1          V          5                       Source          1            2          160
+     1          V          5                     Galerkin          9            9          720
+     1          V          5            V        Jacobian          9            9          720
+     1          V          5                Surf Galerkin          8            8          640
+     1          V          5            V   Surf Jacobian          8            8          640
+     1          V          6                       Source          1            2          160
+     1          V          6                     Galerkin         15           15         1200
+     1          V          6            V        Jacobian         15           15         1200
+     1          V          6                Surf Galerkin         14           14         1120
+     1          V          6            V   Surf Jacobian         14           14         1120
+     1          V          7                       Source          1            2          160
+     1          V          7                     Galerkin          9            9          720
+     1          V          7            V        Jacobian          9            9          720
+     1          V          7                Surf Galerkin          8            8          640
+     1          V          7            V   Surf Jacobian          8            8          640
+
+EQUATION 1 PARAMETER DEPENDENCIES:
+ KDIEL           KMETAL          KAIR            K              
+
+BC 1  REGION 1 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 2 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 3 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 4 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 5 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 6 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 1  REGION 7 BC TIME DERIVATIVE
+|    ZERO 
+----------------------------------------
+
+BC 2  REGION 1 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 2  REGION 2 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 2  REGION 3 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 2  REGION 4 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 3  REGION 4 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 3  REGION 5 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 3  REGION 6 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BC 3  REGION 7 BC TIME DERIVATIVE
+|    V.T  
+----------------------------------------
+
+BOUNDARY CONDITION TAGS with associated BC INDEX
+BC TAG   1: nat(1)
+BC TAG   2: val(2)
+BC TAG   3: val(3)
+
+BOUNDARY CONDITION FORMULAS [BCINDEX]
+BC INDEX 1 NAT(V)
+|  0.00000
+----------------------------------------
+
+        REGIONS
+    1 |       1      2      3      4      5      6      7
+BC INDEX 2 VAL(V)
+|     V0  
+----------------------------------------
+
+        REGIONS
+    1 |       1      2      3      4
+BC INDEX 3 VAL(V)
+|     V1  
+----------------------------------------
+
+        REGIONS
+    1 |       4      5      6      7
+
+--------------------------
+SUMMARIZE BOUNDARY CONDITIONS
+--------------------------
+    BC      DEFINES   COMPARTMENT     DEPENDS     FUNCTION     COMPLEXITY    MEMORY
+----------------------------------------------------------------------
+     1          V            1                  Surf Galerkin          1         80
+     1          V            1              V   Surf Jacobian          1         80
+     1          V            2                  Surf Galerkin          1         80
+     1          V            2              V   Surf Jacobian          1         80
+     1          V            3                  Surf Galerkin          1         80
+     1          V            3              V   Surf Jacobian          1         80
+     1          V            4                  Surf Galerkin          1         80
+     1          V            4              V   Surf Jacobian          1         80
+     1          V            5                  Surf Galerkin          1         80
+     1          V            5              V   Surf Jacobian          1         80
+     1          V            6                  Surf Galerkin          1         80
+     1          V            6              V   Surf Jacobian          1         80
+     1          V            7                  Surf Galerkin          1         80
+     1          V            7              V   Surf Jacobian          1         80
+     2          V            1                  Surf Galerkin          1         80
+     2          V            1              V   Surf Jacobian          1         80
+     2          V            2                  Surf Galerkin          1         80
+     2          V            2              V   Surf Jacobian          1         80
+     2          V            3                  Surf Galerkin          1         80
+     2          V            3              V   Surf Jacobian          1         80
+     2          V            4                  Surf Galerkin          1         80
+     2          V            4              V   Surf Jacobian          1         80
+     3          V            1                  Surf Galerkin          3        240
+     3          V            1              V   Surf Jacobian          1         80
+     3          V            2                  Surf Galerkin          3        240
+     3          V            2              V   Surf Jacobian          1         80
+     3          V            3                  Surf Galerkin          3        240
+     3          V            3              V   Surf Jacobian          1         80
+     3          V            4                  Surf Galerkin          3        240
+     3          V            4              V   Surf Jacobian          1         80
+
+--------------------------------
+SUMMARIZE FITS AND INTEGRALS
+---------------------------------
+                             REGION/       BASE        CSE
+    FIT         KIND       COMPARTMENT  COMPLEXITY  COMPLEXITY  MEMORY  DEPENDENCY
+-----------------------------------------------------------------------------------------
+     1      Volume Integral       1          10         10        800    V
+     1      Volume Integral       2          10         10        800    V
+     1      Volume Integral       3          10         10        800    V
+     1      Volume Integral       4          10         10        800    V
+     1      Volume Integral       5          10         10        800    V
+     1      Volume Integral       6          10         10        800    V
+     1      Volume Integral       7          10         10        800    V
+
+-------------------------------
+SUMMARIZE PLOT EQUATIONS
+-------------------------------
+                                     BASE        CSE
+   PLOT    ARGUMENT COMPARTMENT  COMPLEXITY  COMPLEXITY    MEMORY
+------------------------------------------------------------------
+     1          1          1          1          1           80
+     1          1          2          1          1           80
+     1          1          3          1          1           80
+     1          1          4          1          1           80
+     1          1          5          1          1           80
+     1          1          6          1          1           80
+     1          1          7          1          1           80
+     2          1          1          1          1           80
+     2          1          2          1          1           80
+     2          1          3          1          1           80
+     2          1          4          1          1           80
+     2          1          5          1          1           80
+     2          1          6          1          1           80
+     2          1          7          1          1           80
+     3          1          1          1          1           80
+     3          1          2          1          1           80
+     3          1          3          1          1           80
+     3          1          4          1          1           80
+     3          1          5          1          1           80
+     3          1          6          1          1           80
+     3          1          7          1          1           80
+     4          1          1          1          1           80
+     4          1          2          1          1           80
+     4          1          3          1          1           80
+     4          1          4          1          1           80
+     4          1          5          1          1           80
+     4          1          6          1          1           80
+     4          1          7          1          1           80
+     5          1          1          1          1           80
+     5          1          2          1          1           80
+     5          1          3          1          1           80
+     5          1          4          1          1           80
+     5          1          5          1          1           80
+     5          1          6          1          1           80
+     5          1          7          1          1           80
+     5          2          1          1          1           80
+     5          2          2          1          1           80
+     5          2          3          1          1           80
+     5          2          4          1          1           80
+     5          2          5          1          1           80
+     5          2          6          1          1           80
+     5          2          7          1          1           80
+     6          1          1          1          1           80
+     6          1          2          1          1           80
+     6          1          3          1          1           80
+     6          1          4          1          1           80
+     6          1          5          1          1           80
+     6          1          6          1          1           80
+     6          1          7          1          1           80
+
+==UNUSED== PARAMETER DEFINITIONS:
+ EPS0            EPS0MM         
+
+Uorder=3
+ V order=3
+Lanczos/DInv FINAL ITERATION 11 of 1000 RNORM=0 XNORM=1.18869e-016 Flag=0 MS=0
+Orthomin/DInv FINAL ITERATION 152 of 1000 RNORM=0.0103484 XNORM=284.428 Flag=0 MS=927
+Orthomin/DInv FINAL ITERATION 192 of 1000 RNORM=1.47914e-006 XNORM=0.256614 Flag=0 MS=1084
+Orthomin/DInv FINAL ITERATION 187 of 1000 RNORM=3.94909e-010 XNORM=5.0015e-005 Flag=0 MS=1068
+Orthomin/DInv FINAL ITERATION 176 of 1000 RNORM=2.82113e-013 XNORM=1.39772e-008 Flag=0 MS=1060
+RMS Spatial Errors   0.067823
+DO_NEXTSTAGE pde 000000001781A8E0  MAXSTAGE=0

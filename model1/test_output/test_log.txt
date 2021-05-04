@@ -1,0 +1,12 @@
+FlexPDE Version 7.07/W64  16:16:39 Sep 29 2017
+(Times listed are wall-clock times, not charged CPU).
+
+START C:\Users\kevin\Desktop\Year 3\Semester2\ECNG3022\CW3\Sim\model1\test.pde  17:24:52 5/3/21
+Using 1 Threads  Cubic Curvature 
+ +00:00:03| Mesh Import Complete
+ +00:00:17| (1)Linear Step 1 Error= 112.6355 Orthomin/DInv(32)
+ +00:00:22| (1)Linear Step 2 Error= 0.247533 Orthomin/DInv(75)
+ +00:00:29| (1)Linear Step 3 Error= 7.529e-6 Orthomin/DInv(123)
+ +00:00:39| (1)Linear Step 4 Error= 1.008e-9 Orthomin/DInv(166)
+ +00:00:39| GRID 1 Nodes=20806 Cells=117940 DOF=537290 RMS ERR= 6.673e-4 MAX ERR= 0.002393 MEM=883691
+ +00:03:10| --DONE-- 17:28:02 5/3/21

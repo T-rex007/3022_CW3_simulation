@@ -6,13 +6,13 @@ variables
     v        { the azimuthal component of the  vector potential }
  
 definitions
-   Lx =0.005
-   Ly = 0.005
+   scale = 1
+   Lx =0.005*shift
+   Ly = 0.005*shift
     mu0 = pi *4e-7            { the permeability }
    ! mu 
     J = 0              { the source defaults to zero }
    ! rmu = 1/ mu
-    nudge = 0.0001
     wire_length = 0.02
     pen_len = 1.5/100
     
@@ -49,9 +49,6 @@ definitions
     
     muu_di = pi *4e-7 
     eps_di = 2.1
-    
-    scale = 1
-
 
     wire_rad = (1e-3) * scale
     cop_out = (1e-3 - 0.75e-3)* scale                                                               !thickness of outside component
@@ -77,7 +74,7 @@ definitions
    sig_cortical =  2.85e-2
    sig_cancel = 9.71e-2
    
-   Emag = -grad(v)!Magnitude(Ex,Ey,Ez)
+   Emag = magnitude(Ex,Ey,Ez)
    ! Emag = sqrt(Ex^2 + Ey^2 + Ez^2)
    ! SAR Calculations
    SAR_skin = (0.7071 * sig_skin * Emag^2)/skin_md
@@ -108,7 +105,7 @@ SURFACE 'Mus Top' z=mth + dcb + dcanb
 SURFACE 'Fat top' z=fth + mth + dcb + dcanb
       LAYER 'Skin'
 SURFACE 'skin Top' z=sth + fth + mth + dcb + dcanb
-SURFACE 'Top' z=0.08
+SURFACE 'Top' z=0.08*shift
 
 BOUNDARIES
 REGION 1 'box' 
@@ -148,19 +145,19 @@ LIMITED REGION 2 'tissue' { the embedded blob }
 LIMITED REGION 3 'Terminal' { the embedded blob }
      LAYER 4 
      !mu = muu_in
-     eps = 1e-15
+     eps = 1e8
         
      LAYER 5 
      !mu = muu_in
-     eps = 1e-15
+     eps = 1e8
         
      LAYER 6 
      !mu = muu_in
-     eps = 1e-15
+     eps = 1e8
      
      LAYER 7
      !mu = muu_in
-     eps = 1e-15
+     eps = 1e8
      
      START(cop_in+hole, 0)
      value(v) = v0
@@ -203,15 +200,15 @@ LIMITED REGION 5 'Dielectric' { the embedded blob }
 LIMITED REGION 6 'Ground' { the embedded blob }
      LAYER 4 
      !mu = muu_out
-     eps = 1e-15
+     eps = 1e8
         
      LAYER 5 
      !mu = muu_out
-     eps = 1e-15
+     eps = 1e8
         
      LAYER 6 
      !mu = muu_out
-     eps = 1e-15
+     eps = 1e8
      
      START(cop_out + di_s_d+cop_in+hole, 0)
      value(v) = 0
@@ -225,6 +222,8 @@ PLOTS
 GRID(y,z) ON x=0
      CONTOUR(v) ON x=0
      VECTOR(Ey, Ez) ON x=0
+     VECTOR(Ex, Ez) ON y=0
+     VECTOR(Ex, Ey) ON z=0
      !vector(Ex, Ey, Ez)
      
      
